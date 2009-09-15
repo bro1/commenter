@@ -14,10 +14,7 @@ object Launcher {
      val comments = (zz \\ "div").filter( _.attribute("class").mkString == "comm-container")
          
      comments foreach {(com) =>
-//       println (com)
-       //println ((((com \ "comm-name")\"strong").text))
-cmt (com)       
-       
+        cmt (com)
      }
       
     
