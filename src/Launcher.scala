@@ -23,6 +23,9 @@ object Launcher {
    
    
    def cmt (com : scala.xml.Node) {
+     
+       getId(com)
+     
        println ("Nuo: " + 
          ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text)
      
@@ -37,21 +40,28 @@ object Launcher {
      
    }
    
+   def getId(com : scala.xml.Node)  {
+     val id : String = com.attribute("id").get.text     
+     println(id.substring(1))
+   }
    
    def dt(com : scala.xml.Node)  {
+
+     // Delfi returns date in the following format 
+     // 2009 09 13 10:48 
      
      val strDate =            
          ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "div").text
      
-       val df = new SimpleDateFormat("yyyy MM dd HH:mm");       
+       val dateFormat = new SimpleDateFormat("yyyy MM dd HH:mm");       
        
        
-       df.setTimeZone(java.util.TimeZone.getTimeZone("Europe/Vilnius"))
-       val d = df.parse(strDate)
+       dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Europe/Vilnius"))
+       val date = dateFormat.parse(strDate)
 
        
-       println(d)       
-       //2009 09 13 10:48
+       println(date)       
+
      
    }
    
