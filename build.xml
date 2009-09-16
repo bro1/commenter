@@ -29,10 +29,11 @@
       <pathelement location="${scala-library.jar}"   /> 
       <pathelement location="${scala-swing.jar}"   />
       <pathelement location="../minej-dev/lib/tagsoup/tagsoup-1.2.jar"/>
+      <pathelement location="../minej-dev/bin"/>
     </path>
     
     <path id="run.classpath">
-       <path refid="build.classpath"/>
+      <path refid="build.classpath"/>
        <pathelement location="${build.dir}"   /> 
      </path>
     
@@ -47,11 +48,11 @@
 
   
   <target name="run.launch" >
-     <java classpathref="run.classpath" classname="Launcher"/>
+     <java classpathref="run.classpath" classname="Launcher" fork="true"/>
   </target>
   
   <target name="run.app" >
-     <java classpathref="run.classpath" classname="MainApplication"/>
+     <java classpathref="run.classpath" classname="MainApplication" fork="true"/>
   </target>
 
   
