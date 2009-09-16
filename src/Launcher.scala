@@ -1,6 +1,8 @@
 import java.io.{File,FileReader}
 import java.text.{SimpleDateFormat}
 import java.util.Date
+import scala.xml.{Node}
+
 
 import java.util.TimeZone
   
@@ -17,9 +19,29 @@ object Launcher {
         cmt (com)
      }
       
-    
+     download (urls(zz)) 
+     
+     
       
    }
+   
+   def download (strings : Seq[Node] ) {
+     
+     //map(strings => _.attribute("href").get.text)
+//     strings foreach {(s) => {
+//         
+//           println (s.attribute("href").get.text)        
+//       
+//       } 
+//     }
+   
+   println (strings.map(s=> s.attribute("href")))
+   
+   }
+   
+   def urls(doc : Node)  = 
+      (doc \\ "a").filter(_.attribute("class").mkString == "comNav") 
+   
    
    
    def cmt (com : scala.xml.Node) {
