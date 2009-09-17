@@ -4,11 +4,13 @@ import bro1.mine.http.HttpUtil
 
 object http {
 
-  val http = new HttpUtil;
+  val httpUtil = new HttpUtil()
+  
+  HttpUtil.setDebugMode(true)
   
   def download (url : String) = {
     
-	  http.getUrl(url);
+	  httpUtil.getUrl(url);
     
   }
   
