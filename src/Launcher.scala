@@ -21,13 +21,18 @@ object Launcher {
       
    }
    
+   def getFrom(com : scala.xml.Node) = {
+      println ("Nuo: " + 
+         ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text)
+
+   } 
    
    def cmt (com : scala.xml.Node) {
      
        getId(com)
      
-       println ("Nuo: " + 
-         ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text)
+       getFrom(com)
+       
      
        dt(com)
        
@@ -40,9 +45,9 @@ object Launcher {
      
    }
    
-   def getId(com : scala.xml.Node)  {
-     val id : String = com.attribute("id").get.text     
-     println(id.substring(1))
+   def getId(com : scala.xml.Node) = {
+     val id : String = com.attribute("id").get.text
+     id.substring(1)
    }
    
    def dt(com : scala.xml.Node)  {

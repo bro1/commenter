@@ -1,8 +1,13 @@
-abstract class Comment {
+import java.util.Date
 
-  var id : String;
-  var postedAd : java.util.Date = null
-  var postedBy : String
-  var text : String;
+abstract class Comment (
+  val id : String, val postedAt : Date, val postedBy  : String , val text : String) {
   
+  override def toString = {
+    "Comment ID: " + id + "\n" +
+    "Posted at: " +  postedAt + "\n" +
+    "Author:" + postedBy + "\n" +
+    text    
+  }
+    
 }
