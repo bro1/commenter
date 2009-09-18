@@ -19,6 +19,24 @@ class MyTable extends Table {
 }
 
 
+
+class CommentPanel(com : Comment) extends GridBagPanel {
+  
+  object commentField extends TextArea(com.text) { 
+	lineWrap = true                   
+  }
+  
+  layout(new Label(com.postedBy)) = new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both}
+  layout(new Label(com.postedAt.toString)) = new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both}
+  layout(new Button("+")) = new Constraints{gridx = 2; gridy = 0; fill = GridBagPanel.Fill.Both}
+  layout(new Button("-")) = new Constraints{gridx = 3; gridy = 0; fill = GridBagPanel.Fill.Both}
+  layout(commentField) = new Constraints{gridx = 0; gridy = 1; gridwidth = 4; fill = GridBagPanel.Fill.Both}  
+  border = Swing.EmptyBorder(15, 10, 10, 10)  
+
+}
+
+object sampleComment extends CommentPanel(new Comment("id", new java.util.Date, "author", "comment L1" +"\n" + "comment line 2"))   
+
 object MainApplication extends SimpleGUIApplication {
   
   var com : Topic = FetchTopic.processTopic("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
@@ -35,17 +53,19 @@ object MainApplication extends SimpleGUIApplication {
     
     object sp extends ScrollPane {
       
-      
       contents = { 
           object t extends MyTable() {
               model = MyTableModel
               rowHeight = 50
               
               override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {
-                 new TextArea(com.comments{row}.text) { 
-                   lineWrap = true
-                   pack
+                 val v = new TextArea(com.comments{row}.text) { 
+                   lineWrap = true                    
                  }
+                 
+                 v.revalidate
+                 
+                 v
               }
               
           }
@@ -71,7 +91,9 @@ object MainApplication extends SimpleGUIApplication {
 //      contents += fahrenheit
       border = Swing.EmptyBorder(15, 10, 10, 10)
       
-      layout(sp) = new Constraints {grid = (0, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal}      
+      layout(sp) = new Constraints {grid = (0, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal}
+      
+      layout(sampleComment) = new Constraints {grid = (0, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
       
     }
         
