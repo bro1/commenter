@@ -17,7 +17,7 @@ object FetchTopic {
        
        val contentStringReader = new StringReader (content) 
               
-       val doc = new TagSoupFactoryAdapter load url
+       val doc = new TagSoupFactoryAdapter load contentStringReader
        
 //       val comments = (doc \\ "div").filter( _.attribute("class").mkString == "comm-container")
        
