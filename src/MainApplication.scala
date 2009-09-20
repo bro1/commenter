@@ -54,7 +54,9 @@ object MainApplication extends SimpleGUIApplication {
     }
     
     
-    object load1 extends Button ("Load")  
+    object load1 extends Button ("Load")
+    
+    object buttonSubscribe extends Button ("Subscribe")
     
     contents = new GridBagPanel {
       layout(new Label("Vardas: ")) = new Constraints {gridx = 0; gridy = 0}
@@ -62,6 +64,7 @@ object MainApplication extends SimpleGUIApplication {
       layout(new Label("Komentaras:")) =  new Constraints {gridx = 0; gridy = 1}
       layout(fahrenheit) = new Constraints {gridx = 1; gridy = 1}
       layout(load1)  = new Constraints {gridx = 0; gridy = 2}                         
+      layout(buttonSubscribe)  = new Constraints {gridx = 1; gridy = 2}
                          
       
 //      contents += 
@@ -75,7 +78,7 @@ object MainApplication extends SimpleGUIApplication {
     }
         
     
-    listenTo(nameField, fahrenheit, load1)
+    listenTo(nameField, fahrenheit, load1, buttonSubscribe)
     
     reactions += {
       case ValueChanged(`fahrenheit`) =>
@@ -92,6 +95,11 @@ object MainApplication extends SimpleGUIApplication {
       case ButtonClicked(`load1`) => {
         t1.updateSize
       }
+      
+      case ButtonClicked(`buttonSubscribe`) => {
+        
+      }
+
                 
         
     }     
