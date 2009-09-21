@@ -2,3 +2,4 @@
 /.manager
 /build.properties
 /.settings
+/misc/*.db
