@@ -121,7 +121,7 @@ object MainApplication extends SimpleGUIApplication {
       }
       
       case ButtonClicked(`buttonSubscribe`) => {
-        
+        SubscribeToTopicWindow.visible = true
       }
 
                 
