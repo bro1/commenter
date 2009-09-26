@@ -75,7 +75,9 @@ object MainApplication extends SimpleGUIApplication {
     }
     
     
-    object load1 extends Button ("Load")  
+    object load1 extends Button ("Load")
+    
+    object buttonSubscribe extends Button ("Subscribe")
     
     contents = new GridBagPanel {
       layout(new Label("Vardas: ")) = new Constraints {gridx = 0; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
@@ -83,6 +85,8 @@ object MainApplication extends SimpleGUIApplication {
       layout(new Label("Komentaras:")) =  new Constraints {gridx = 0; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
       layout(fahrenheit) = new Constraints {gridx = 1; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
       layout(load1)  = new Constraints {gridx = 0; gridy = 2; gridwidth = 2; anchor = GridBagPanel.Anchor.East}                         
+      layout(buttonSubscribe)  = new Constraints {gridx = 1; gridy = 2}
+
                          
       
 //      contents += 
@@ -98,7 +102,7 @@ object MainApplication extends SimpleGUIApplication {
     }
         
     
-    listenTo(nameField, fahrenheit, load1)
+    listenTo(nameField, fahrenheit, load1, buttonSubscribe)
     
     reactions += {
       case ValueChanged(`fahrenheit`) =>
@@ -115,6 +119,11 @@ object MainApplication extends SimpleGUIApplication {
       case ButtonClicked(`load1`) => {
         t1.updateSize
       }
+      
+      case ButtonClicked(`buttonSubscribe`) => {
+        SubscribeToTopicWindow.visible = true
+      }
+
                 
         
     }     
