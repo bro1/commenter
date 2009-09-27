@@ -4,6 +4,7 @@ import scala.dbc.syntax.Statement._
 import scala.dbc.statement._
 import scala.dbc.value._
 import java.net.URI
+import java.sql.DriverManager
 
 
 import swing._
@@ -102,6 +103,70 @@ object typ {
   })
   }
   
+}
+
+
+object Data {
+  val db = {
+    val nativeDriverClass = Class.forName("org.sqlite.JDBC")
+    DriverManager.getConnection("jdbc:sqlite:misc/test.db")    
+  }
+  
+  def subscribe(name : String, topicType : String, url : String) = { 
+              
+      val ps = db.prepareStatement("insert into topic(name, topictype, url) values (?, ?, ?)");
+      var i : Int = 1      
+      ps.setString(i, name) ; i += 1
+      ps.setString(i, topicType) ; i += 1
+      ps.setString(i, url) ; i += 1
+                             
+      val r = ps.executeUpdate
+      var idr = ps.getGeneratedKeys
+        
+      if (idr.next) {
+        Some(idr.getInt(1))
+      } else {
+        None
+      }                              
+                        
+      
+  }
+  
+  
+  def getSubscribtions() = {
+    val ps = db.prepareStatement("select name, topictype, url from topic")
+    val res = ps.executeQuery
+    
+    val aa : List[Topic] = List()
+    
+    while(res.next) {
+      
+      val name = res.getString(1)
+      val topicType = res.getString(2)
+      val url = res.getString(3)
+      
+      new Topic(name, topicType, url) :: aa
+      
+      
+    }
+    
+    aa    
+    
+  }
+ 
+    
+    
+//      public Connection connect() throws ClassNotFoundException, SQLException {
+//
+//    Class.forName(driverClassName);
+//
+//    String jdbcUrl = getJdbcUrl();
+//    Connection db = DriverManager.getConnection(jdbcUrl, username, password); // connect to the db
+//    
+//    return db;
+//  }
+
+    
 }
 
 
