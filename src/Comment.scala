@@ -22,15 +22,14 @@ class EditableComment () {
 
 
 
-class Topic (val title: String, val url : String) {  
+class Topic (val title: String, val topicType : String, val url : String) {  
   
   var comments :  List[Comment] = List()
   
 }
 
 class DelfiTopic (title: String, url : String) 
-  extends Topic (title, url) {
-    
+  extends Topic (title, "delfi", url) {    
     
   
 }
