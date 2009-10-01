@@ -1,8 +1,8 @@
-import scala.dbc._
-import scala.dbc.syntax._
-import scala.dbc.syntax.Statement._
-import scala.dbc.statement._
-import scala.dbc.value._
+//import scala.dbc._
+//import scala.dbc.syntax._
+//import scala.dbc.syntax.Statement._
+//import scala.dbc.statement._
+//import scala.dbc.value._
 import java.net.URI
 import java.sql.DriverManager
 
@@ -61,7 +61,7 @@ object SubscribeToTopicWindow extends Frame {
   
   
   def subscribe(url : String) {
-    dbctest.subscribe(url, "", url)
+    Data.subscribe(url, "", url)
   }
    
 } 
@@ -72,13 +72,14 @@ object SubscribeToTopicWindow extends Frame {
 object SubscribeToTopic {
   
   def main(args: Array[String]) {
-    dbctest getSubscribtions
+    Data getSubscribtions
   }
 
   
   
 }
 
+/*
 object SqliteVendor extends Vendor {
   val uri = new URI("jdbc:sqlite:misc/test.db")
   val user = ""
@@ -105,6 +106,7 @@ object typ {
   
 }
 
+*/
 
 object Data {
   val db = {
@@ -132,12 +134,30 @@ object Data {
       
   }
   
+
+  def getSampleSubscriptions() = {
+      val topicSubscriptions : List[Topic] = List()
+
+      
+      new Topic(
+          "Sample topic",
+          "delfi",
+          "file://misc/examples/delfi/str1p1.html"
+      ) :: topicSubscriptions
+
+      
+      new Topic(
+          "Sample topic bernardinai",
+          "bernardinai",
+          "file://misc/examples/bernardinai/bernardinai1.html"
+      ) :: topicSubscriptions
+  }
   
   def getSubscribtions() = {
     val ps = db.prepareStatement("select name, topictype, url from topic")
     val res = ps.executeQuery
     
-    val aa : List[Topic] = List()
+    val topicSubscriptions : List[Topic] = List()
     
     while(res.next) {
       
@@ -145,12 +165,11 @@ object Data {
       val topicType = res.getString(2)
       val url = res.getString(3)
       
-      new Topic(name, topicType, url) :: aa
-      
+      new Topic(name, topicType, url) :: topicSubscriptions
       
     }
     
-    aa    
+    topicSubscriptions
     
   }
  
@@ -169,7 +188,7 @@ object Data {
     
 }
 
-
+/*
 object dbctest  {
   
   val db = new Database(SqliteVendor)
@@ -215,3 +234,4 @@ object dbctest  {
   
   
 }
+*/

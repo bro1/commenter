@@ -7,30 +7,21 @@ object FetchTopic {
 
      def main(args: Array[String]) {
        val url = args{0}
- 
        processTopic (url)
- 
      }
      
     def processTopic(url : String) = {
        val content = lj.scala.utils.http.download(url)
-       
        val contentStringReader = new StringReader (content) 
-              
        val doc = new TagSoupFactoryAdapter load contentStringReader
-       
-//       val comments = (doc \\ "div").filter( _.attribute("class").mkString == "comm-container")
-       
        val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
-         
-       val topic = new Topic(url, url) 
+       val topic = new Topic(url, "delfi", url) 
        
        comments foreach {(com) =>
-           topic.comments  ::= cmt (com)
+         topic.comments  ::= cmt (com)
        }  
        
        topic
- 
     } 
      
      
@@ -49,15 +40,8 @@ object FetchTopic {
       
        println("----------------------------")
       
-//       val n = ((com \ "div").filter(
-//         _.attribute("class").mkString == "comm-text") \ "div") filter( _.attribute("class") == None)
-
-//       val n = ((com \ "div").filter(
-//         _ \ "@class" == "comm-text") \ "div") filter( _.attribute("class") == None)
-
-         val n = ((com \ "div").filter(
+       val n = ((com \ "div").filter(
          _ \ "@class" == "comm-text") \ "div").filter( _ \ "@class" != Some)
-
   
        val s = processChildren(n.first)
        println (s)
@@ -67,11 +51,9 @@ object FetchTopic {
     
     
     def processChildren(com : Node) : String = {
-
       var text = ""      
       com.child foreach { (childElement) =>  text += convertNodeToText(childElement)}       
       text
-      
     }
     
     
@@ -89,6 +71,7 @@ object FetchTopic {
     
     def cleanUp(a : String) = {
       var s = a.replaceAll("&quot", "\"")
+      s = s.replaceAll("&gt;", ">")
       
       if (s.startsWith("\n")) {
         s = s.substring(1)  
@@ -109,27 +92,20 @@ object FetchTopic {
     * 2009 09 13 10:48 
     */
    def dt(com : scala.xml.Node) = {
-
-     
      val strDate =            
          ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "div").text
-     
-       val dateFormat = new SimpleDateFormat("yyyy MM dd HH:mm");       
-       
-       
-       dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Europe/Vilnius"))
-       
-       dateFormat.parse(strDate)
-     
+     getDate(strDate)
    }
+
+  def getDate(dateString : String) = {
+     val dateFormat = new SimpleDateFormat("yyyy MM dd HH:mm");       
+     dateFormat.setTimeZone(java.util.TimeZone.getTimeZone("Europe/Vilnius"))
+     dateFormat.parse(dateString)
+  }
    
               
-    def getFrom(com : scala.xml.Node) = {
-       
-         ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text
-
+   def getFrom(com : scala.xml.Node) = {
+      ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text
    } 
-
-
   
 }
