@@ -149,7 +149,7 @@ object Data {
       new Topic(
           "Sample topic bernardinai",
           "bernardinai",
-          "file://misc/examples/bernardinai/bernardinai1.html"
+          "file://misc/examples/bernardinai/bernardinai2.html"
       ) :: topicSubscriptions
   }
   

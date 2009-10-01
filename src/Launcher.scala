@@ -15,7 +15,7 @@ object Launcher {
 
 
     def bernardinaiComments = {
-        val url = new FileReader (new File("misc/examples/bernardinai/bernardinai1.html"))
+        val url = new FileReader (new File("misc/examples/bernardinai/bernardinai2.html"))
         val doc = new TagSoupFactoryAdapter load url
 
         //val coms = doc \\ "div".filter(!_.attribute("class").isEmpty && _.attribute("class").get.text == "comment")
@@ -38,6 +38,22 @@ object Launcher {
         val commentDate = getDate(node)
         println(commentDate)
         println(getFrom(node))
+        val id = getID(node)
+        println(id)
+    }
+    
+    def getID(node : Node) = {
+      val coms = (node \\ "span").filter(_.attribute("class").mkString == "report-inappropriate-comment")
+      val aElement = coms \ "a"
+      if (aElement.length != 0) {        
+        val value = aElement.first.attribute("onclick")        
+        val onClickValue = value.get.text
+        val r = """return reportInappropriateComment\((\d+)\)""".r
+        val r(theID) = onClickValue
+        theID
+      } else {
+        "unknown"
+      }
     }
 
     def getFrom (node : Node)  = {
