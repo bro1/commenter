@@ -5,12 +5,13 @@ class MyTable extends Table {
   def updateSize = {
      for (i <- 0 to (rowCount - 1)) {
         
-       val r = rendererComponent(false, false, i, 0)
+       val r = rendererComponent(false, false, i, 0)       
        
        r.preferredSize.width = 75
        println(r.preferredSize)
-       
-       peer.setRowHeight(i, r.preferredSize.height)
+       val c  = peer.getCellRenderer(i,0)       
+       println(c.getTableCellRendererComponent(peer, 0, false, false, i,0))
+       //peer.setRowHeight(i, r.preferredSize.height)
         
      }     
   }
@@ -49,11 +50,13 @@ object MainApplication extends SimpleGUIApplication {
     object nameField extends TextField { columns = 20 }
     object fahrenheit extends TextArea { rows = 6; columns = 20; border = Swing.LineBorder(java.awt.Color.BLACK)}
 
-    object topicsScrollPane extends ScrollPane {
+    object topicsScrollPane extends ScrollPane {      
         contents = {
             object topicsTable extends Table() {
                 model = TopicModel
                 rowHeight = 15
+         
+                preferredViewportSize = new java.awt.Dimension(300, 0)
             }
             topicsTable
         }
@@ -66,9 +69,13 @@ object MainApplication extends SimpleGUIApplication {
               model = MyTableModel
               rowHeight = 50
               
+              peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
+              
               override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {
                  val v = new TextArea(com.comments{row}.text) { 
-                   lineWrap = true                    
+                   lineWrap = true
+                   preferredViewportSize = new java.awt.Dimension(50, 60);
+                   preferredSize = new java.awt.Dimension(100, 200);                   
                  }
                  
                  v.revalidate
@@ -88,21 +95,20 @@ object MainApplication extends SimpleGUIApplication {
     object buttonSubscribe extends Button ("Subscribe")
     
     contents = new GridBagPanel {
-      layout(new Label("Vardas: ")) = new Constraints {gridx = 0; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
-      layout(nameField) = new Constraints {gridx = 1; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
-      layout(new Label("Komentaras:")) =  new Constraints {gridx = 0; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
-      layout(fahrenheit) = new Constraints {gridx = 1; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
-      layout(buttonLoad)  = new Constraints {gridx = 0; gridy = 2; gridwidth = 2; anchor = GridBagPanel.Anchor.East}                         
-      layout(buttonSubscribe)  = new Constraints {gridx = 1; gridy = 2}
+      layout(new Label("Vardas: ")) = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
+      layout(nameField) = new Constraints {gridx = 2; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
+      layout(new Label("Komentaras:")) =  new Constraints {gridx = 1; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
+      layout(fahrenheit) = new Constraints {gridx = 2; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
+      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 2; gridwidth = 2; anchor = GridBagPanel.Anchor.East}                         
+      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 2}
 
       border = Swing.EmptyBorder(15, 10, 10, 10)
       
-      layout(sp) = new Constraints {grid = (0, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal}
+      layout(sp) = new Constraints {grid = (1, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal; weightx=1}
       
-      layout(sampleComment) = new Constraints {grid = (0, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
+      layout(sampleComment) = new Constraints {grid = (1, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
 
-      layout(topicsScrollPane) = new Constraints {grid = (2, 0);
-gridheight = 4 }
+      layout(topicsScrollPane) = new Constraints {grid = (0, 0); gridheight = 5; fill = GridBagPanel.Fill.Both}
 
     }
         
@@ -149,7 +155,7 @@ object TopicModel extends javax.swing.table.AbstractTableModel {
     override def getColumnCount() = { 1 }
    
     override def getRowCount() = { 
-        Data.getSampleSubscriptions().length
+        Data.getSampleSubscriptions().size
     }
    
     override def getColumnName(col : Int) = { "Topic" } }
