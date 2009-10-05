@@ -1,19 +1,72 @@
 import java.text.{SimpleDateFormat}
 import java.util.Date
-import java.io.{StringReader}
+import java.io.{StringReader,File,FileReader}
 import scala.xml.Node
 
-object FetchTopic {
+abstract  class TopicProducer {
+  
+  def process(url : String) = {
+    
+    var reader : java.io.Reader = null;
+    
+    if(url.startsWith("file://")) {
+      reader = new FileReader (new File("misc/examples/bernardinai/bernardinai2.html"))
+
+    } else {
+      val content = lj.scala.utils.http.download(url)
+      reader = new StringReader (content)             
+    }
+    
+    processTopic(url, new TagSoupFactoryAdapter load reader)
+  } 
+  
+  def processTopic(url : String, doc : Node) : Topic  
+}
+
+object HTMLTextUtils {
+      def processChildren(com : Node) : String = {
+      var text = ""      
+      com.child foreach { (childElement) =>  text += convertNodeToText(childElement)}       
+      text
+    }
+    
+    
+    def convertNodeToText(com : Node) : String = {
+         
+     com.label match {
+       case "#PCDATA" => cleanUp(com.text)
+       case "br" =>  "\n"
+       case "i" => "_" + processChildren(com) +  "_"
+       case "font" => "*" + processChildren(com) + "*" 
+       case _ => processChildren(com)
+     }      
+      
+    }
+    
+    def cleanUp(inputString : String) = {
+      var result = inputString.replaceAll("&quot", "\"")
+      result = result.replaceAll("&gt;", ">")
+      result = result.replaceAll("&amp;", "&")
+      
+      if (result.startsWith("\n")) {
+        result = result.substring(1)  
+      }
+      
+      result
+    } 
+
+  
+}
+
+object FetchTopic extends TopicProducer {
 
      def main(args: Array[String]) {
        val url = args{0}
-       processTopic (url)
+       process(url)
      }
      
-    def processTopic(url : String) = {
-       val content = lj.scala.utils.http.download(url)
-       val contentStringReader = new StringReader (content) 
-       val doc = new TagSoupFactoryAdapter load contentStringReader
+    def processTopic(url : String, doc : Node) = {
+             
        val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
        val topic = new Topic(url, "delfi", url) 
        
@@ -36,49 +89,18 @@ object FetchTopic {
    }
     
     
-    def getCommentText (com : scala.xml.Node) = {
+   def getCommentText (com : scala.xml.Node) = {
       
        println("----------------------------")
       
        val n = ((com \ "div").filter(
-         _ \ "@class" == "comm-text") \ "div").filter( _ \ "@class" != Some)
+           _ \ "@class" == "comm-text") \ "div").filter( _ \ "@class" != Some)
   
-       val s = processChildren(n.first)
-       println (s)
-       s
+       val commentText = HTMLTextUtils.processChildren(n.first)
+       println (commentText)
+       commentText
       
-    }
-    
-    
-    def processChildren(com : Node) : String = {
-      var text = ""      
-      com.child foreach { (childElement) =>  text += convertNodeToText(childElement)}       
-      text
-    }
-    
-    
-    def convertNodeToText(com : Node) : String = {
-         
-     com.label match {
-       case "#PCDATA" => cleanUp(com.text)
-       case "br" =>  "\n"
-       case "i" => "_" + processChildren(com) +  "_"
-       case "font" => "*" + processChildren(com) + "*" 
-       case _ => processChildren(com)
-     }      
-      
-    }
-    
-    def cleanUp(a : String) = {
-      var s = a.replaceAll("&quot", "\"")
-      s = s.replaceAll("&gt;", ">")
-      
-      if (s.startsWith("\n")) {
-        s = s.substring(1)  
-      }
-      
-      s
-    } 
+   }    
 
     
    def getId(com : scala.xml.Node) = {

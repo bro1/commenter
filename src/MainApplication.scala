@@ -38,7 +38,7 @@ object sampleComment extends CommentPanel(new Comment("id", new java.util.Date, 
 
 object MainApplication extends SimpleGUIApplication {
   
-  var com : Topic = FetchTopic.processTopic("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
+  var com : Topic = FetchTopic.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
   com.comments = com.comments.reverse
   
   
@@ -47,17 +47,21 @@ object MainApplication extends SimpleGUIApplication {
     
     var t1 : MyTable = null
     
+    object topicsTable extends Table() {
+        model = TopicModel
+        rowHeight = 15
+ 
+        preferredViewportSize = new java.awt.Dimension(300, 0)
+        
+        
+    }
+
+    
     object nameField extends TextField { columns = 20 }
     object fahrenheit extends TextArea { rows = 6; columns = 20; border = Swing.LineBorder(java.awt.Color.BLACK)}
 
     object topicsScrollPane extends ScrollPane {      
         contents = {
-            object topicsTable extends Table() {
-                model = TopicModel
-                rowHeight = 15
-         
-                preferredViewportSize = new java.awt.Dimension(300, 0)
-            }
             topicsTable
         }
     }
@@ -113,7 +117,7 @@ object MainApplication extends SimpleGUIApplication {
     }
         
     
-    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe)
+    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
     
     reactions += {
       case ValueChanged(`fahrenheit`) =>
@@ -131,9 +135,30 @@ object MainApplication extends SimpleGUIApplication {
       case ButtonClicked(`buttonSubscribe`) => {
         SubscribeToTopicWindow.visible = true
       }
+      
+      case TableRowsSelected(`topicsTable`, range, adjusting) => {        
+        println(topicsTable.selection.cells)
         
+        Actions.getSelection(topicsTable.selection.cells)
+        
+        
+      }      
+      
+              
     }     
   }
+  
+  
+object Actions {
+  def getSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
+    if (cells.size != 1) {
+      // Do nothing      
+    }
+    
+//    println(    cells.get(0))
+    
+  }
+}  
   
 object MyTableModel extends javax.swing.table.AbstractTableModel {
 

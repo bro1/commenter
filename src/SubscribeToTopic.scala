@@ -1,8 +1,4 @@
-//import scala.dbc._
-//import scala.dbc.syntax._
-//import scala.dbc.syntax.Statement._
-//import scala.dbc.statement._
-//import scala.dbc.value._
+
 import java.net.URI
 import java.sql.DriverManager
 
@@ -79,34 +75,6 @@ object SubscribeToTopic {
   
 }
 
-/*
-object SqliteVendor extends Vendor {
-  val uri = new URI("jdbc:sqlite:misc/test.db")
-  val user = ""
-  val pass = ""
-  
-  val retainedConnections = 1
-  val nativeDriverClass = Class.forName("org.sqlite.JDBC")
-  val urlProtocolString = "jdbc:sqlite:"
-  
-}
-
-object typ {
-  def char(v : String) = {Utilities.valueToConstant( new CharacterVarying {
-    val dataType = DataTypeUtil.characterVarying(255)
-    val nativeValue = v
-  })}
-  
-  def int (v : Int) = {
-    Utilities.valueToConstant( new ExactNumeric[int] {
-    val dataType = DataTypeUtil.integer
-    val nativeValue = v
-  })
-  }
-  
-}
-
-*/
 
 object Data {
   val db = {
@@ -136,21 +104,23 @@ object Data {
   
 
   def getSampleSubscriptions() = {
-      val topicSubscriptions : List[Topic] = List()
+      var topicSubscriptions : List[Topic] = Nil
 
       
-      new Topic(
+      topicSubscriptions = new Topic(
           "Sample topic",
           "delfi",
           "file://misc/examples/delfi/str1p1.html"
       ) :: topicSubscriptions
 
       
-      new Topic(
+      topicSubscriptions = new Topic(
           "Sample topic bernardinai",
           "bernardinai",
           "file://misc/examples/bernardinai/bernardinai2.html"
       ) :: topicSubscriptions
+      
+      topicSubscriptions
   }
   
   def getSubscribtions() = {
@@ -172,66 +142,6 @@ object Data {
     topicSubscriptions
     
   }
- 
-    
-    
-//      public Connection connect() throws ClassNotFoundException, SQLException {
-//
-//    Class.forName(driverClassName);
-//
-//    String jdbcUrl = getJdbcUrl();
-//    Connection db = DriverManager.getConnection(jdbcUrl, username, password); // connect to the db
-//    
-//    return db;
-//  }
-
     
 }
 
-/*
-object dbctest  {
-  
-  val db = new Database(SqliteVendor)
-  
-  def subscribe(name : String, topicType : String, url : String) = { 
-  
-    val data = InsertionData.Constructor(
-      Some(List("name", "topictype", "url")), 
-      List(typ char name , typ char topicType , typ char url ))
-   
-    db executeStatement  Insert ("topic", data)  
-  }
-  
-  object t extends scala.dbc.statement.Table {
-    def tableName = "topic" 
-    
-    def tableRename = None
-    
-    def fieldTypes = List(DataTypeUtil.integer, DataTypeUtil.characterVarying(255), DataTypeUtil.characterVarying(255), DataTypeUtil.characterVarying(255))
-  }
-  
-  
-  object sel extends scala.dbc.statement.Select {
-    def havingClause = None
-    def groupByClause = None
-    def whereClause = None
-    def fromClause = List(t)
-    
-    
-    def selectList = List()
-    
-    def setQuantifier = None
-    
-    def fieldTypes = List(DataTypeUtil.integer, DataTypeUtil.characterVarying(255), DataTypeUtil.characterVarying(255), DataTypeUtil.characterVarying(255))
-  }
-  
-  
-  def getSubscribtions() = {    
-    
-    db executeStatement (sel)
-  }
-  
-  
-  
-}
-*/

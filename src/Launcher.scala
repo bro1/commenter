@@ -6,7 +6,7 @@ import scala.xml._
 
 import java.util.TimeZone
   
-object Launcher {
+object Launcher extends TopicProducer {
     
     def main(args: Array[String]) {
         // delfiLinks
@@ -15,31 +15,33 @@ object Launcher {
 
 
     def bernardinaiComments = {
-        val url = new FileReader (new File("misc/examples/bernardinai/bernardinai2.html"))
-        val doc = new TagSoupFactoryAdapter load url
-
-        //val coms = doc \\ "div".filter(!_.attribute("class").isEmpty && _.attribute("class").get.text == "comment")
-        //val hasClass = new HasKeyValue("class")
-        val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
-
-        coms foreach {(com) =>
-            cmt (com)
-        }  
-
-        //println(coms)
+      
+      process("file://" + "misc/examples/bernardinai/bernardinai2.html");
+      
     }
+    
+    def processTopic(url : String, doc: Node) = {
+      val topic = new Topic(url, "bernardinai", url) 
+      val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
+      coms foreach {(com) =>
+        topic.comments  ::= cmt (com)        
+      }  
+      topic 
+   }
+    
 
     def cmt(node : Node) = {
-        
+      new Comment( 
+        getID(node),
+        getDate(node),
+        getFrom(node),
+        getCommentText(node))        
+    }
+    
+    
+    def getCommentText(node : Node) = {
         val coms = (node \\ "div").filter(_.attribute("class").mkString == "text")
-        val s = FetchTopic.processChildren(coms.first)
-        println("-----------------------")
-        println(s)
-        val commentDate = getDate(node)
-        println(commentDate)
-        println(getFrom(node))
-        val id = getID(node)
-        println(id)
+        HTMLTextUtils.processChildren(coms.first)        
     }
     
     def getID(node : Node) = {
@@ -58,7 +60,7 @@ object Launcher {
 
     def getFrom (node : Node)  = {
         val coms = (node \\ "span").filter(_.attribute("class").mkString == "author")
-        FetchTopic.cleanUp(coms.first.text)
+        HTMLTextUtils.cleanUp(coms.first.text)
     }
 
   def getDateFromString(dateString : String) = {
