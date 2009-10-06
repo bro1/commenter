@@ -38,7 +38,7 @@ object sampleComment extends CommentPanel(new Comment("id", new java.util.Date, 
 
 object MainApplication extends SimpleGUIApplication {
   
-  var com : Topic = FetchTopic.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
+  var com : Topic = DelfiTopicProducer.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
   com.comments = com.comments.reverse
   
   
@@ -70,7 +70,7 @@ object MainApplication extends SimpleGUIApplication {
       
       contents = { 
           object CommentsTable extends MyTable() {
-              model = MyTableModel
+              model = CommentsModel
               rowHeight = 50
               
               peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
@@ -114,8 +114,7 @@ object MainApplication extends SimpleGUIApplication {
 
       layout(topicsScrollPane) = new Constraints {grid = (0, 0); gridheight = 5; fill = GridBagPanel.Fill.Both}
 
-    }
-        
+    }        
     
     listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
     
@@ -136,27 +135,32 @@ object MainApplication extends SimpleGUIApplication {
         SubscribeToTopicWindow.visible = true
       }
       
-      case TableRowsSelected(`topicsTable`, range, adjusting) => {        
-        Actions.getSelection(topicsTable.selection.cells)
+      case TableRowsSelected(`topicsTable`, range, adjusting) => {
+        if (!adjusting) {
+          Actions.getTopicSelection(topicsTable.selection.cells)
+        }
       }      
     }     
   }
   
   
 object Actions {
-  def getSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
-    if (cells.size != 1) {
-      // Do nothing      
+  
+  def getTopicSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
+        
+    if (cells.size == 1) {
+      for ((row, col) <- cells) { 
+        println("Topic no: " + row)         
+        val t = Data.getSampleSubscriptions(){row}
+        t
+      }
     }
-    
-//    println(    cells.get(0))
-    
   }
 }  
   
-object MyTableModel extends javax.swing.table.AbstractTableModel {
+object CommentsModel extends javax.swing.table.AbstractTableModel {
 
-    override def getValueAt(a : Int, b  : Int) = { com.comments{a}.text }  
+    override def getValueAt(row : Int, col : Int) = { com.comments{row}.text }  
       
     override def getColumnCount() = { 1 }
    
