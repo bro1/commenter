@@ -45,7 +45,7 @@ object MainApplication extends SimpleGUIApplication {
   def top = new MainFrame {
     title = "Komentatorius"
     
-    var t1 : MyTable = null
+    var commentsTable : MyTable = null
     
     object topicsTable extends Table() {
         model = TopicModel
@@ -66,30 +66,30 @@ object MainApplication extends SimpleGUIApplication {
         }
     }
     
-    object sp extends ScrollPane {
+    object commentsScrollPane extends ScrollPane {
       
       contents = { 
-          object t extends MyTable() {
+          object CommentsTable extends MyTable() {
               model = MyTableModel
               rowHeight = 50
               
               peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
               
               override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {
-                 val v = new TextArea(com.comments{row}.text) { 
+                 val commentTextArea = new TextArea(com.comments{row}.text) { 
                    lineWrap = true
                    preferredViewportSize = new java.awt.Dimension(50, 60);
                    preferredSize = new java.awt.Dimension(100, 200);                   
                  }
                  
-                 v.revalidate
+                 commentTextArea.revalidate
                  
-                 v
+                 commentTextArea
               }
               
           }
-          t1 = t 
-          t
+          commentsTable = CommentsTable 
+          CommentsTable
       }
     }
     
@@ -108,7 +108,7 @@ object MainApplication extends SimpleGUIApplication {
 
       border = Swing.EmptyBorder(15, 10, 10, 10)
       
-      layout(sp) = new Constraints {grid = (1, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal; weightx=1}
+      layout(commentsScrollPane) = new Constraints {grid = (1, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal; weightx=1}
       
       layout(sampleComment) = new Constraints {grid = (1, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
 
@@ -129,7 +129,7 @@ object MainApplication extends SimpleGUIApplication {
         fahrenheit.text = f.toString
         
       case ButtonClicked(`buttonLoad`) => {
-        t1.updateSize
+        commentsTable.updateSize
       }
       
       case ButtonClicked(`buttonSubscribe`) => {
@@ -137,14 +137,8 @@ object MainApplication extends SimpleGUIApplication {
       }
       
       case TableRowsSelected(`topicsTable`, range, adjusting) => {        
-        println(topicsTable.selection.cells)
-        
         Actions.getSelection(topicsTable.selection.cells)
-        
-        
       }      
-      
-              
     }     
   }
   
