@@ -57,7 +57,7 @@
 
   
   
-  <target name="build" >
+  <target name="build" description="build the application">
     <mkdir dir="${build.dir}"   />
     <scalac srcdir="${sources.dir}"
             destdir="${build.dir}"
