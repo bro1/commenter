@@ -28,6 +28,12 @@ class Topic (val title: String, val topicType : String, val url : String) {
   
 }
 
+class BeranrdinaiTopic(title: String, url : String) 
+  extends Topic (title, "bernardinai", url) {
+    
+}
+  
+
 class DelfiTopic (title: String, url : String) 
   extends Topic (title, "delfi", url) {    
     

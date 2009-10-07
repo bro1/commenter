@@ -46,7 +46,7 @@ object BernardinaiTopicProducer extends TopicProducer {
     }
     
     def processTopic(url : String, doc: Node) = {
-      val topic = new Topic(url, "bernardinai", url) 
+      val topic = new BernardinaiTopic(url, url) 
       val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
       coms foreach {(com) =>
         topic.comments  ::= cmt (com)        
@@ -126,17 +126,17 @@ object DelfiTopicProducer extends TopicProducer {
     def processTopic(url : String, doc : Node) = {
              
        val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
-       val topic = new Topic(url, "delfi", url) 
+       val topic = new DelfiTopic(url, url) 
        
        comments foreach {(com) =>
-         topic.comments  ::= cmt (com)
+         topic.comments ::= extractComment(com)
        }  
        
        topic
     } 
      
      
-    def cmt (com : scala.xml.Node) = {
+    def extractComment (com : scala.xml.Node) = {
             
       new Comment( 
          getId(com),
