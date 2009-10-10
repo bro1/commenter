@@ -2,10 +2,12 @@ import java.util.Date
 
 
 class Comment (
-  val id : String, val postedAt : Date, val postedBy  : String , val text : String) {
+  val id : Int,
+  val remoteCommentID : String, val postedAt : Date, val postedBy  : String , val text : String) {
   
   override def toString = {
-    "Comment ID: " + id + "\n" +
+    "id" + id + "\n" +
+    "Comment ID: " + remoteCommentID + "\n" +
     "Posted at: " +  postedAt + "\n" +
     "Author:" + postedBy + "\n" +
     text    
@@ -28,7 +30,7 @@ class Topic (val title: String, val topicType : String, val url : String) {
   
 }
 
-class BeranrdinaiTopic(title: String, url : String) 
+class BernardinaiTopic(title: String, url : String) 
   extends Topic (title, "bernardinai", url) {
     
 }

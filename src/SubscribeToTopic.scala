@@ -142,6 +142,31 @@ object Data {
     topicSubscriptions
     
   }
+  
+  
+  def getCommentsForTopic(url : String) {
+    
+    var comments : List[Comment] = Nil
+    
+    val ps = db.prepareStatement("""
+            select c.* from comment c 
+            join topic t on t.id = c.topicid
+            where t.url = ?"""    )
+    ps.setString(1, url)
+    val rs = ps.executeQuery
+    while(rs.next) {
+      val time = rs.getDate("time")
+      val commentText = rs.getString("comment")
+      val id = rs.getInt("id")
+      val remoteCommentID = rs.getString("remotecommentid")
+      val postedBy = rs.getString("author")
+      
+      comments ::= new Comment(id, remoteCommentID, time, postedBy, commentText)
+    }
+    
+    comments
+    
+  }
     
 }
 

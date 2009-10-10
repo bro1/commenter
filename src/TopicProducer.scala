@@ -57,6 +57,7 @@ object BernardinaiTopicProducer extends TopicProducer {
 
     def cmt(node : Node) = {
       new Comment( 
+        -1,
         getID(node),
         getDate(node),
         getFrom(node),
@@ -138,7 +139,8 @@ object DelfiTopicProducer extends TopicProducer {
      
     def extractComment (com : scala.xml.Node) = {
             
-      new Comment( 
+      new Comment(
+         -1,
          getId(com),
          dt(com),
          getFrom(com),

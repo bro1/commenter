@@ -11,8 +11,7 @@ class MyTable extends Table {
        println(r.preferredSize)
        val c  = peer.getCellRenderer(i,0)       
        println(c.getTableCellRendererComponent(peer, 0, false, false, i,0))
-       //peer.setRowHeight(i, r.preferredSize.height)
-        
+       //peer.setRowHeight(i, r.preferredSize.height)        
      }     
   }
 }
@@ -34,7 +33,7 @@ class CommentPanel(com : Comment) extends GridBagPanel {
 
 }
 
-object sampleComment extends CommentPanel(new Comment("id", new java.util.Date, "author", "comment L1" +"\n" + "comment line 2"))   
+object sampleComment extends CommentPanel(new Comment(-1, "id", new java.util.Date, "author", "comment L1" +"\n" + "comment line 2"))   
 
 object MainApplication extends SimpleGUIApplication {
   
