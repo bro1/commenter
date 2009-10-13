@@ -21,7 +21,7 @@ class MyTable extends Table {
 class CommentPanel(com : Comment) extends GridBagPanel {
   
   object commentField extends TextArea(com.text) { 
-	lineWrap = true                   
+	  lineWrap = true                   
   }
   
   layout(new Label(com.postedBy)) = new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both}
@@ -150,8 +150,9 @@ object Actions {
     if (cells.size == 1) {
       for ((row, col) <- cells) { 
         println("Topic no: " + row)         
-        val t = Data.getSampleSubscriptions(){row}
-        t
+        val topic = Data.getSampleSubscriptions(){row}
+        
+        Data.getCommentsForTopic(topic.url)        
       }
     }
   }
