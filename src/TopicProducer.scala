@@ -4,8 +4,6 @@ import java.util.Date
 import scala.xml._
 import lj.scala.utils.{HTMLTextUtils,TagSoupFactoryAdapter}
 
-
-
 import java.util.TimeZone
 
 

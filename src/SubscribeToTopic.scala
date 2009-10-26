@@ -146,6 +146,9 @@ object Data {
   
   def getCommentsForTopic(url : String) {
     
+    // TODO: remove 
+    return
+    
     var comments : List[Comment] = Nil
     
     val ps = db.prepareStatement("""

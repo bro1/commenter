@@ -37,9 +37,10 @@ object sampleComment extends CommentPanel(new Comment(-1, "id", new java.util.Da
 
 object MainApplication extends SimpleGUIApplication {
   
-  var com : Topic = DelfiTopicProducer.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
-  com.comments = com.comments.reverse
-  
+//  var com : Topic = DelfiTopicProducer.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
+//  com.comments = com.comments.reverse
+
+  var com : Topic = null
   
   def top = new MainFrame {
     title = "Komentatorius"
@@ -152,7 +153,7 @@ object Actions {
         println("Topic no: " + row)         
         val topic = Data.getSampleSubscriptions(){row}
         
-        Data.getCommentsForTopic(topic.url)        
+        Data.getCommentsForTopic(topic.url)       
       }
     }
   }
@@ -164,7 +165,14 @@ object CommentsModel extends javax.swing.table.AbstractTableModel {
       
     override def getColumnCount() = { 1 }
    
-    override def getRowCount() = { com.comments.length }
+    override def getRowCount() = { 
+      if (com != null) {  
+        com.comments.length
+      } else {
+        0
+      } 
+    
+    }
    
     override def getColumnName(col : Int) = { "Comment" } }
 }

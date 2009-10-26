@@ -26,7 +26,34 @@ class EditableComment () {
 
 class Topic (val title: String, val topicType : String, val url : String) {  
   
+  var frequencies : List[Long] = List(); 
+  
   var comments :  List[Comment] = List()
+  
+  def getTimeOfNextUpdate = {
+    val latestCommentDate : java.util.Date = getLatestCommentDate();
+    
+    val frequency = getFrequencyInSeconds();
+  }
+  
+  def getLatestCommentDate() = {
+    new java.util.Date()
+  }
+  
+  def getFrequencyInSeconds() = {
+    val lastComments = getLast10Comments();
+    
+    
+    lastComments.reduceLeft((a: Comment, b: Comment)=> {      
+      frequencies = (a.postedAt.getTime - b.postedAt.getTime) :: frequencies 
+      b;
+    })
+    
+  }
+  
+  def getLast10Comments() = {
+    comments
+  }  
   
 }
 
