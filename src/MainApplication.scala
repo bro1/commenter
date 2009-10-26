@@ -171,8 +171,8 @@ object CommentsModel extends javax.swing.table.AbstractTableModel {
 
 object TopicModel extends javax.swing.table.AbstractTableModel {
 
-    override def getValueAt(a : Int, b  : Int) = {
-        Data.getSampleSubscriptions(){a}.url
+    override def getValueAt(row : Int, col : Int) = {
+        Data.getSampleSubscriptions(){row}.url
     }  
       
     override def getColumnCount() = { 1 }
