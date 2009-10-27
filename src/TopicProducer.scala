@@ -14,7 +14,9 @@ abstract class TopicProducer {
     var reader : java.io.Reader = null;
     
     if(url.startsWith("file://")) {
-      reader = new FileReader (new File("misc/examples/bernardinai/bernardinai2.html"))
+      
+      val fileName = url.substring(7)
+      reader = new FileReader (new File(fileName))
 
     } else {
       val content = lj.scala.utils.http.download(url)

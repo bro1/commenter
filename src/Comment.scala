@@ -26,7 +26,6 @@ class EditableComment () {
 
 class Topic (val title: String, val topicType : String, val url : String) {  
   
-  var frequencies : List[Long] = List(); 
   
   var comments :  List[Comment] = List()
   
@@ -40,14 +39,39 @@ class Topic (val title: String, val topicType : String, val url : String) {
     new java.util.Date()
   }
   
+  /**
+   * Get posting frequency of the last 10 comments.
+   */
   def getFrequencyInSeconds() = {
     val lastComments = getLast10Comments();
     
+    var frequencies : List[Long] = List(); 
     
-    lastComments.reduceLeft((a: Comment, b: Comment)=> {      
-      frequencies = (a.postedAt.getTime - b.postedAt.getTime) :: frequencies 
-      b;
-    })
+    if(!lastComments.isEmpty) {
+    
+      lastComments.reduceLeft{
+        (a: Comment, b: Comment)=> {      
+          frequencies = (a.postedAt.getTime - b.postedAt.getTime) :: frequencies 
+          b;
+        }
+      }
+    }
+    
+    println(frequencies)
+    
+    val size = frequencies.size    
+    
+    if (size != 0) {
+      val sum = (0L :: frequencies).reduceLeft((a:Long, b:Long) => {
+        a + b
+      })
+      
+      sum / size
+    } else {
+      0
+    }
+    
+    
     
   }
   
@@ -58,13 +82,9 @@ class Topic (val title: String, val topicType : String, val url : String) {
 }
 
 class BernardinaiTopic(title: String, url : String) 
-  extends Topic (title, "bernardinai", url) {
+  extends Topic (title, "bernardinai", url) 
     
-}
-  
+
 
 class DelfiTopic (title: String, url : String) 
-  extends Topic (title, "delfi", url) {    
-    
-  
-}
+  extends Topic (title, "delfi", url)     

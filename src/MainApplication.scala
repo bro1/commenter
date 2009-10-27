@@ -152,7 +152,7 @@ object Actions {
       for ((row, col) <- cells) { 
         println("Topic no: " + row)         
         val topic = Data.getSampleSubscriptions(){row}
-        
+        topic.getTimeOfNextUpdate
         Data.getCommentsForTopic(topic.url)       
       }
     }
