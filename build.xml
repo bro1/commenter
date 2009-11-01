@@ -30,6 +30,9 @@
       <pathelement location="${scala-swing.jar}"   />
       <pathelement location="../minej-dev/lib/tagsoup/tagsoup-1.2.jar"/>
       <pathelement location="../minej-dev/bin"/>
+      <fileset dir="lib">
+        <include name="*.jar"/>
+      </fileset>
     </path>
     
     <path id="run.classpath">
@@ -51,11 +54,13 @@
      <java classpathref="run.classpath" classname="Launcher" fork="true"/>
   </target>
   
-  <target name="run.app" >
+  <target name="run" description="Run the application">
      <java classpathref="run.classpath" classname="MainApplication" fork="true"/>
   </target>
 
-  
+  <target name="clean">
+    <delete dir="${build.dir}"   />
+  </target>  
   
   <target name="build" description="build the application">
     <mkdir dir="${build.dir}"   />
