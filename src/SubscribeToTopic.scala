@@ -77,6 +77,7 @@ object SubscribeToTopic {
 
 
 object Data {
+  
   val db = {
     val nativeDriverClass = Class.forName("org.sqlite.JDBC")
     DriverManager.getConnection("jdbc:sqlite:misc/test.db")    
@@ -102,34 +103,12 @@ object Data {
       
   }
   
-
-  def getSampleSubscriptions() = {
-      var topicSubscriptions : List[Topic] = Nil
-
-      
-      topicSubscriptions = new Topic(
-          1002L,
-          "Sample topic",
-          "delfi",
-          "file://misc/examples/delfi/str1p1.html"
-      ) :: topicSubscriptions
-
-      
-      topicSubscriptions = new Topic(
-          1001L,
-          "Sample topic bernardinai",
-          "bernardinai",
-          "file://misc/examples/bernardinai/bernardinai2.html"
-      ) :: topicSubscriptions
-      
-      topicSubscriptions
-  }
   
   def getSubscribtions() = {
     val ps = db.prepareStatement("select id, name, topictype, url from topic")
     val res = ps.executeQuery
     
-    val topicSubscriptions : List[Topic] = List()
+    var topicSubscriptions : List[Topic] = List()
     
     while(res.next) {
       
@@ -138,7 +117,7 @@ object Data {
       val topicType = res.getString(3)
       val url = res.getString(4)
       
-      new Topic(id, name, topicType, url) :: topicSubscriptions
+      topicSubscriptions = new Topic(id, name, topicType, url) :: topicSubscriptions
       
     }
     
@@ -147,15 +126,15 @@ object Data {
   }
   
   
-  def getCommentsForTopic(url : String) = {
+  def getCommentsForTopic(id : Long) = {
     
     var comments : List[Comment] = Nil
     
     val ps = db.prepareStatement("""
             select c.* from comment c 
             join topic t on t.id = c.topicid
-            where t.url = ?"""    )
-    ps.setString(1, url)
+            where t.id = ?"""    )
+    ps.setLong(1, id)
     val rs = ps.executeQuery
     while(rs.next) {
       val time = rs.getDate("time")

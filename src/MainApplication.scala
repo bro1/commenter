@@ -151,9 +151,12 @@ object Actions {
     if (cells.size == 1) {
       for ((row, col) <- cells) { 
         println("Topic no: " + row)         
-        val topic = Data.getSampleSubscriptions(){row}
+        val topic = Data.getSubscribtions(){row}
         topic.getTimeOfNextUpdate
-        Data.getCommentsForTopic(topic.url)       
+        
+       topic
+        
+        Data.getCommentsForTopic(topic.id)        
       }
     }
   }
@@ -180,13 +183,13 @@ object CommentsModel extends javax.swing.table.AbstractTableModel {
 object TopicModel extends javax.swing.table.AbstractTableModel {
 
     override def getValueAt(row : Int, col : Int) = {
-        Data.getSampleSubscriptions(){row}.url
+      Data.getSubscribtions(){row}.title
     }  
       
     override def getColumnCount() = { 1 }
    
     override def getRowCount() = { 
-        Data.getSampleSubscriptions().size
+        Data.getSubscribtions().size
     }
    
     override def getColumnName(col : Int) = { "Topic" } }
