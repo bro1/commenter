@@ -8,28 +8,37 @@ import java.util.TimeZone
 
 
 abstract class TopicProducer {
-  
-  def process(url : String) = {
+ 
+  def getReader(url : String) : java.io.Reader = {
     
     var reader : java.io.Reader = null;
     
     if(url.startsWith("file://")) {
       
       val fileName = url.substring(7)
-      reader = new FileReader (new File(fileName))
+      new FileReader (new File(fileName))
 
     } else {
       
       val content = lj.scala.utils.http.download(url)
-      reader = new StringReader (content)
-      
+      new StringReader (content)      
     }
     
+  }
+  
+  def process(url : String) = {
     // TODO: what to do about the ID
-    processTopic(-1L, url, new TagSoupFactoryAdapter load reader)
+    processTopic(-1L, url, new TagSoupFactoryAdapter load getReader(url))
+  }
+  
+  def processComments(topic : Topic) = {
+    val doc = new TagSoupFactoryAdapter load getReader(topic.url)
+    extractComments(doc, topic)
   } 
   
-  def processTopic(id : Long, url : String, doc : Node) : Topic  
+  def processTopic(id : Long, url : String, doc : Node) : Topic
+  
+  def extractComments(doc : Node, topic : Topic) 
 }
 
 
@@ -49,13 +58,18 @@ object BernardinaiTopicProducer extends TopicProducer {
     }
     
     def processTopic(id : Long, url : String, doc: Node) = {
-      val topic = new BernardinaiTopic(id, url, url) 
+      val topic = new BernardinaiTopic(id, url, url)
+      extractComments(doc, topic)
+      topic 
+   }
+    
+    def extractComments(doc : Node, topic : Topic) = {
       val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
       coms foreach {(com) =>
         topic.comments  ::= cmt (com)        
       }  
-      topic 
-   }
+      
+    }
     
 
     def cmt(node : Node) = {
@@ -98,7 +112,6 @@ object BernardinaiTopicProducer extends TopicProducer {
      dateFormat.parse(dateString)
   }
 
-
     def getDate(node : Node) = {
         val coms = (node \\ "span").filter(_.attribute("class").mkString == "time date")
         getDateFromString(coms.first.text)
@@ -128,16 +141,23 @@ object DelfiTopicProducer extends TopicProducer {
      }
      
     def processTopic(id : Long, url : String, doc : Node) = {
-             
-       val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
+                   
        val topic = new DelfiTopic(id, url, url) 
+      
+       extractComments(doc, topic)
+       
+       topic
+    } 
+    
+    def extractComments(doc : Node, topic : Topic) = {
+      
+       val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
        
        comments foreach {(com) =>
          topic.comments ::= extractComment(com)
        }  
-       
-       topic
-    } 
+      
+    }
      
      
     def extractComment (com : scala.xml.Node) = {
