@@ -108,6 +108,7 @@ object Data {
 
       
       topicSubscriptions = new Topic(
+          1002L,
           "Sample topic",
           "delfi",
           "file://misc/examples/delfi/str1p1.html"
@@ -115,6 +116,7 @@ object Data {
 
       
       topicSubscriptions = new Topic(
+          1001L,
           "Sample topic bernardinai",
           "bernardinai",
           "file://misc/examples/bernardinai/bernardinai2.html"
@@ -124,18 +126,19 @@ object Data {
   }
   
   def getSubscribtions() = {
-    val ps = db.prepareStatement("select name, topictype, url from topic")
+    val ps = db.prepareStatement("select id, name, topictype, url from topic")
     val res = ps.executeQuery
     
     val topicSubscriptions : List[Topic] = List()
     
     while(res.next) {
       
-      val name = res.getString(1)
-      val topicType = res.getString(2)
-      val url = res.getString(3)
+      val id = res.getLong(1)
+      val name = res.getString(2)
+      val topicType = res.getString(3)
+      val url = res.getString(4)
       
-      new Topic(name, topicType, url) :: topicSubscriptions
+      new Topic(id, name, topicType, url) :: topicSubscriptions
       
     }
     
@@ -144,7 +147,7 @@ object Data {
   }
   
   
-  def getCommentsForTopic(url : String) {
+  def getCommentsForTopic(url : String) = {
     
     var comments : List[Comment] = Nil
     
@@ -166,6 +169,18 @@ object Data {
     
     comments
     
+  }
+  
+  
+  def saveTopic(topic : Topic) = {
+    val ps = db.prepareStatement("""update topic set lastchecked = ? where  id = ?""")
+    
+    val lastChecked = new java.sql.Date(topic.lastChecked.getTime)
+    
+    ps.setDate(1, lastChecked)
+    ps.setLong(2, topic.id)
+    
+    ps.execute
   }
     
 }

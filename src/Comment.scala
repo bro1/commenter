@@ -24,8 +24,9 @@ class EditableComment () {
 
 
 
-class Topic (val title: String, val topicType : String, val url : String) {  
+class Topic (val id : Long, val title: String, val topicType : String, val url : String) {  
   
+  var lastChecked : Date = new Date(0);
   
   var comments :  List[Comment] = List()
   
@@ -71,20 +72,27 @@ class Topic (val title: String, val topicType : String, val url : String) {
       0
     }
     
-    
-    
   }
   
   def getLast10Comments() = {
     comments
-  }  
+  }
+  
+  def setLastCheckedNow() = {
+    lastChecked = new Date();
+    saveToDb()
+  }
+  
+  def saveToDb () = {
+    Data.saveTopic(this)    
+  }
   
 }
 
-class BernardinaiTopic(title: String, url : String) 
-  extends Topic (title, "bernardinai", url) 
+class BernardinaiTopic(id:Long, title: String, url : String) 
+  extends Topic (id, title, "bernardinai", url) 
     
 
 
-class DelfiTopic (title: String, url : String) 
-  extends Topic (title, "delfi", url)     
+class DelfiTopic (id : Long, title: String, url : String) 
+  extends Topic (id, title, "delfi", url)     

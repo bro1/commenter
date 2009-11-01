@@ -19,14 +19,17 @@ abstract class TopicProducer {
       reader = new FileReader (new File(fileName))
 
     } else {
+      
       val content = lj.scala.utils.http.download(url)
-      reader = new StringReader (content)             
+      reader = new StringReader (content)
+      
     }
     
-    processTopic(url, new TagSoupFactoryAdapter load reader)
+    // TODO: what to do about the ID
+    processTopic(-1L, url, new TagSoupFactoryAdapter load reader)
   } 
   
-  def processTopic(url : String, doc : Node) : Topic  
+  def processTopic(id : Long, url : String, doc : Node) : Topic  
 }
 
 
@@ -45,8 +48,8 @@ object BernardinaiTopicProducer extends TopicProducer {
       
     }
     
-    def processTopic(url : String, doc: Node) = {
-      val topic = new BernardinaiTopic(url, url) 
+    def processTopic(id : Long, url : String, doc: Node) = {
+      val topic = new BernardinaiTopic(id, url, url) 
       val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
       coms foreach {(com) =>
         topic.comments  ::= cmt (com)        
@@ -124,10 +127,10 @@ object DelfiTopicProducer extends TopicProducer {
        process(url)
      }
      
-    def processTopic(url : String, doc : Node) = {
+    def processTopic(id : Long, url : String, doc : Node) = {
              
        val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
-       val topic = new DelfiTopic(url, url) 
+       val topic = new DelfiTopic(id, url, url) 
        
        comments foreach {(com) =>
          topic.comments ::= extractComment(com)
