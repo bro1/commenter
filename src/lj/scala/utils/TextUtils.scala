@@ -3,7 +3,9 @@ import java.util.Date
 import java.io.{StringReader,File,FileReader}
 import scala.xml.Node
 
+
 package lj.scala.utils {
+
 
 object HTMLTextUtils {
       def processChildren(com : Node) : String = {

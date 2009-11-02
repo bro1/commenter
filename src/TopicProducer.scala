@@ -2,7 +2,8 @@ import java.io.{File,FileReader,StringReader}
 import java.text.{SimpleDateFormat}
 import java.util.Date
 import scala.xml._
-import lj.scala.utils.{HTMLTextUtils,TagSoupFactoryAdapter}
+//import lj.scala.utils.HTMLTextUtils
+//import lj.scala.utils.TagSoupFactoryAdapter
 
 import java.util.TimeZone
 
