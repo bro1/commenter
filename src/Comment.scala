@@ -24,7 +24,7 @@ class EditableComment () {
 
 
 
-class Topic (val id : Long, val title: String, val topicType : String, val url : String) {  
+class Topic (var id : Long, val title: String, val topicType : String, val url : String) {  
   
   var lastChecked : Date = new Date(0);
   
@@ -85,6 +85,10 @@ class Topic (val id : Long, val title: String, val topicType : String, val url :
   
   def saveToDb () = {
     Data.saveTopic(this)    
+  }
+  
+  def insertToDb() = {
+    Data.insertTopic(this)
   }
   
 }

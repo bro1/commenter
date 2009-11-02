@@ -76,6 +76,10 @@ object SubscribeToTopic {
 }
 
 
+object TopicCache {
+  var topics : List[Topic] = List()
+}
+
 object Data {
   
   val db = {
@@ -160,6 +164,30 @@ object Data {
     ps.setLong(2, topic.id)
     
     ps.execute
+  }
+  
+  def insertTopic(topic : Topic) = {
+    val ps = db.prepareStatement("""insert into topic (name, topictype, url) values (?, ?, ?)""")
+    ps.setString(1, topic.title)
+    ps.setString(2, topic.topicType)
+    ps.setString(3, topic.url)
+    
+    ps.execute
+    
+    topic.id = lastID
+    
+    TopicCache.topics ::= topic
+  } 
+  
+  
+  val lastIDStatement = db.prepareStatement("""select last_insert_rowid()""")
+  
+  def lastID : Long = {
+    val rs = lastIDStatement.executeQuery
+    rs.next
+    val id = rs.getLong(1)
+    if (id == 0) throw new Exception("cannot read an ID - got 0")
+    return id
   }
     
 }

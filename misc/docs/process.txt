@@ -1,9 +1,16 @@
 Topic
 Comment
-TopicProducdr
+TopicProducer
 
 TopicProducer -> produces a new topic based on a url
 
 Topic -> saves topic to DB
 
+Topic -> uses TopicProducer to extract the comments from URL
+
 TopicProducer -> extracts comments from URL (given a URL or topic ID)
+
+TopicCache - contains the cached list of topics
+
+Q: Where do I merge comments with Topic comments
+A: Topic
