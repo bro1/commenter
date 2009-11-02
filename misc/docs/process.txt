@@ -1,0 +1,9 @@
+Topic
+Comment
+TopicProducdr
+
+TopicProducer -> produces a new topic based on a url
+
+Topic -> saves topic to DB
+
+TopicProducer -> extracts comments from URL (given a URL or topic ID)
