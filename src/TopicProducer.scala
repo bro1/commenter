@@ -27,19 +27,30 @@ abstract class TopicProducer {
     
   }
   
-  def process(url : String) = {
+  def process(url : String) : Topic = {
     // TODO: what to do about the ID
-    processTopic(-1L, url, new TagSoupFactoryAdapter load getReader(url))
+    val doc = new TagSoupFactoryAdapter load getReader(url)
+    val topic = createTopic(-1L, url, doc)
+    topic.comments = extractAllComments(doc)
+    topic
   }
   
+  
+  /**
+   * Add only the comments that do not exist in the topic
+   */
   def processComments(topic : Topic) = {
     val doc = new TagSoupFactoryAdapter load getReader(topic.url)
-    extractComments(doc, topic)
+    val allComments = extractAllComments(doc)
+       
+    topic.comments ++ (allComments -- topic.comments)
   } 
   
-  def processTopic(id : Long, url : String, doc : Node) : Topic
+  def createTopic(id : Long, url : String, doc : Node) : Topic
   
-  def extractComments(doc : Node, topic : Topic) 
+//  def extractComments(doc : Node, topic : Topic)
+  
+  def extractAllComments(doc : Node) : List[Comment]
 }
 
 
@@ -58,33 +69,17 @@ object BernardinaiTopicProducer extends TopicProducer {
       
     }
     
-    def processTopic(id : Long, url : String, doc: Node) = {
-      val topic = new BernardinaiTopic(id, url, url)
-      extractComments(doc, topic)
-      topic 
-   }
+    def createTopic(id : Long, url : String, doc: Node) = {
+      new BernardinaiTopic(id, url, url)
+    }
     
     
-    def extractAllComments(doc : Node) : Seq[Comment] = {
-      
-      var comments : List[Comment] = List()
-      
+    def extractAllComments(doc : Node) : List[Comment] = {
       val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
-      
-      for {com <- coms} yield cmt(com)
-      
+      (for {com <- coms} yield getComment(com)).toList      
     }
-    
-    def extractComments(doc : Node, topic : Topic) = {
-            val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
-      coms foreach {(com) =>
-        topic.comments  ::= cmt (com)        
-      }  
 
-    }
-    
-
-    def cmt(node : Node) = {
+    def getComment(node : Node) = {
       new Comment( 
         -1,
         getID(node),
@@ -152,25 +147,15 @@ object DelfiTopicProducer extends TopicProducer {
        process(url)
      }
      
-    def processTopic(id : Long, url : String, doc : Node) = {
-                   
-       val topic = new DelfiTopic(id, url, url) 
-      
-       extractComments(doc, topic)
-       
-       topic
+    def createTopic(id : Long, url : String, doc : Node) = {
+      new DelfiTopic(id, url, url) 
     } 
+
     
-    def extractComments(doc : Node, topic : Topic) = {
-      
+    def extractAllComments(doc : Node) : List[Comment] = {
        val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
-       
-       comments foreach {(com) =>
-         topic.comments ::= extractComment(com)
-       }  
-      
-    }
-     
+       (for{com <- comments} yield  extractComment(com)).toList
+    }     
      
     def extractComment (com : scala.xml.Node) = {
             
