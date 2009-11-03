@@ -64,12 +64,23 @@ object BernardinaiTopicProducer extends TopicProducer {
       topic 
    }
     
-    def extractComments(doc : Node, topic : Topic) = {
+    
+    def extractAllComments(doc : Node) : Seq[Comment] = {
+      
+      var comments : List[Comment] = List()
+      
       val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
+      
+      for {com <- coms} yield cmt(com)
+      
+    }
+    
+    def extractComments(doc : Node, topic : Topic) = {
+            val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
       coms foreach {(com) =>
         topic.comments  ::= cmt (com)        
       }  
-      
+
     }
     
 
