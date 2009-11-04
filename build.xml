@@ -1,4 +1,4 @@
-<project default="build">
+<project name="Commenter" default="build">
 
   <property file="build.properties"/>
 
@@ -62,7 +62,7 @@
     <delete dir="${build.dir}"   />
   </target>  
   
-  <target name="build" description="build the application">
+  <target name="compile" description="build the application">
     <mkdir dir="${build.dir}"   />
     <scalac srcdir="${sources.dir}"
             destdir="${build.dir}"

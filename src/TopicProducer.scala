@@ -45,10 +45,8 @@ abstract class TopicProducer {
        
     topic.comments ++ (allComments -- topic.comments)
   } 
-  
+
   def createTopic(id : Long, url : String, doc : Node) : Topic
-  
-//  def extractComments(doc : Node, topic : Topic)
   
   def extractAllComments(doc : Node) : List[Comment]
 }
