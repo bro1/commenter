@@ -16,9 +16,12 @@ class Comment (
   override def equals(other : Any) = {
 
     other match {
-      case c : Comment => {                
-         id == c.id && id != -1        
-         // TODO: incomeplete equality 
+      case c : Comment => {
+        if (id != -1) {
+          id == c.id
+        } else {
+          postedAt == c.postedAt && postedBy == c.postedBy        
+        }
       }  
       case _ => false
     } 
