@@ -12,6 +12,18 @@ class Comment (
     "Author:" + postedBy + "\n" +
     text    
   }
+  
+  override def equals(other : Any) = {
+
+    other match {
+      case c : Comment => {                
+         id == c.id && id != -1        
+         // TODO: incomeplete equality 
+      }  
+      case _ => false
+    } 
+    
+  }
     
 }
 
