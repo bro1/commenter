@@ -73,8 +73,23 @@ object BernardinaiTopicProducer extends TopicProducer {
     
     
     def extractAllComments(doc : Node) : List[Comment] = {
-      val coms = (doc \\ "div").filter(_.attribute("class").mkString == "comment")
-      (for {com <- coms} yield getComment(com)).toList      
+
+//      for (div <- (doc \\ "div")) {
+//          div match {
+//
+//                case d @ <div>{_*}</div> if (d \ "@class").text.startsWith("sf_comment ") => {
+//                      println ("match found")
+//              }
+//
+//            case _ => {}
+//          }
+//
+//      }
+
+        val coms = (doc \\ "div").filter(div => (div \ "@class").text.startsWith("sf_comment "))
+        
+        (for {com <- coms} yield getComment(com)).toList
+       
     }
 
     def getComment(node : Node) = {
@@ -88,26 +103,34 @@ object BernardinaiTopicProducer extends TopicProducer {
     
     
     def getCommentText(node : Node) = {
-        val coms = (node \\ "div").filter(_.attribute("class").mkString == "text")
-        HTMLTextUtils.processChildren(coms.first)        
+        val coms = (node \\ "div").filter(div => (div \ "@class").text == "sf_comment_text")
+        HTMLTextUtils.processChildren(coms.first)
     }
     
     def getID(node : Node) = {
-      val coms = (node \\ "span").filter(_.attribute("class").mkString == "report-inappropriate-comment")
-      val aElement = coms \ "a"
-      if (aElement.length != 0) {        
-        val value = aElement.first.attribute("onclick")        
-        val onClickValue = value.get.text
-        val r = """return reportInappropriateComment\((\d+)\)""".r
-        val r(theID) = onClickValue
-        theID
-      } else {
-        "unknown"
-      }
+
+
+//        val coms = (node \\ "span").filter(_.attribute("class").mkString == "report-inappropriate-comment")
+//      val aElement = coms \ "a"
+//      if (aElement.length != 0) {
+//        val value = aElement.first.attribute("onclick")
+//        val onClickValue = value.get.text
+//        val r = """return reportInappropriateComment\((\d+)\)""".r
+//        val r(theID) = onClickValue
+//        theID
+//      } else {
+//        "unknown"
+//      }
+
+        val coms = (node \ "@id").text
+        val length = "sf_comment_".length
+        coms.substring(length)
     }
 
     def getFrom (node : Node)  = {
-        val coms = (node \\ "span").filter(_.attribute("class").mkString == "author")
+//        val coms = (node \\ "span").filter(_.attribute("class").mkString == "author")
+
+        val coms = (node \\ "span").filter(span => (span \ "@class").text == "sf_comment_author")
         HTMLTextUtils.cleanUp(coms.first.text)
     }
 
@@ -118,7 +141,7 @@ object BernardinaiTopicProducer extends TopicProducer {
   }
 
     def getDate(node : Node) = {
-        val coms = (node \\ "span").filter(_.attribute("class").mkString == "time date")
+        val coms = (node \\ "span").filter(span => (span \ "@class").text == "comment_author_date")
         getDateFromString(coms.first.text)
     }
 

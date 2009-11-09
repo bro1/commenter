@@ -7,6 +7,11 @@
     value="src"
      />
 
+  <property
+    name="tests.dir"
+    value="test"
+     />
+
 
   <property
     name="build.dir"
@@ -29,6 +34,8 @@
       <pathelement location="${scala-library.jar}"   /> 
       <pathelement location="${scala-swing.jar}"   />
       <pathelement location="../minej-dev/lib/tagsoup/tagsoup-1.2.jar"/>
+      <pathelement location="${system.libs.location}/junit4.jar"/>
+      <pathelement location="${system.libs.location}/hamcrest-core.jar"/>
       <pathelement location="../minej-dev/bin"/>
       <fileset dir="lib">
         <include name="*.jar"/>
@@ -39,6 +46,11 @@
       <path refid="build.classpath"/>
        <pathelement location="${build.dir}"   /> 
      </path>
+     
+    <path id="test.classpath">
+      <path refid="run.classpath"/>
+       <pathelement location="${tests.dir}/bin"   /> 
+     </path>     
     
     
     
@@ -68,8 +80,47 @@
             destdir="${build.dir}"
             classpathref="build.classpath"
             force="changed">
+      <src>
+        <pathelement location="${sources.dir}"/>
+      </src>
       <include name="**/*.scala"   />      
     </scalac>
+
+    <scalac 
+            destdir="${tests.dir}/bin"
+            classpathref="run.classpath"
+            force="changed">
+      <src>
+         <pathelement location="${tests.dir}/src"/>
+      </src>
+      <include name="**/*.scala" />      
+    </scalac>    
+  </target>
+
+
+  <target name="test" depends="compile">
+    <junit printsummary="yes" dir="${basedir}" fork="yes">
+      <classpath>
+        <path refid="test.classpath"/>
+      </classpath>
+      <formatter type="xml"/>
+      <formatter type="brief" usefile="false"/>
+      <batchtest todir="${tests.dir}/results">
+         <fileset dir="${tests.dir}/bin">
+      		<include name="**/*.class"/>      	
+    	 </fileset>
+      </batchtest>
+      
+    </junit> 
+    
+    
+    <junitreport todir="${tests.dir}/reports">
+	  <fileset dir="${tests.dir}/results">
+		<include name="TEST-*.xml"/>
+	  </fileset>
+	  <report format="frames" todir="${tests.dir}/reports"/>
+	</junitreport>
+    
   </target>
 
 </project>
