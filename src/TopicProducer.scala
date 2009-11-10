@@ -38,12 +38,18 @@ abstract class TopicProducer {
   
   /**
    * Add only the comments that do not exist in the topic
+   * 
+   * @return new comments
    */
   def processComments(topic : Topic) = {
     val doc = new TagSoupFactoryAdapter load getReader(topic.url)
     val allComments = extractAllComments(doc)
+
+        println("Number of comments extracted" + allComments.size)
        
-    topic.comments ++ (allComments -- topic.comments)
+    val newComments = (allComments -- topic.comments)     
+    topic.comments ++ newComments
+    newComments
   } 
 
   def createTopic(id : Long, url : String, doc : Node) : Topic
@@ -73,23 +79,8 @@ object BernardinaiTopicProducer extends TopicProducer {
     
     
     def extractAllComments(doc : Node) : List[Comment] = {
-
-//      for (div <- (doc \\ "div")) {
-//          div match {
-//
-//                case d @ <div>{_*}</div> if (d \ "@class").text.startsWith("sf_comment ") => {
-//                      println ("match found")
-//              }
-//
-//            case _ => {}
-//          }
-//
-//      }
-
-        val coms = (doc \\ "div").filter(div => (div \ "@class").text.startsWith("sf_comment "))
-        
-        (for {com <- coms} yield getComment(com)).toList
-       
+      val coms = (doc \\ "div").filter(div => (div \ "@class").text.startsWith("sf_comment "))
+      (for {com <- coms} yield getComment(com)).toList       
     }
 
     def getComment(node : Node) = {
@@ -104,32 +95,18 @@ object BernardinaiTopicProducer extends TopicProducer {
     
     def getCommentText(node : Node) = {
         val coms = (node \\ "div").filter(div => (div \ "@class").text == "sf_comment_text")
-        HTMLTextUtils.processChildren(coms.first)
+        HTMLTextUtils.getText(coms.first)
     }
     
     def getID(node : Node) = {
 
-
-//        val coms = (node \\ "span").filter(_.attribute("class").mkString == "report-inappropriate-comment")
-//      val aElement = coms \ "a"
-//      if (aElement.length != 0) {
-//        val value = aElement.first.attribute("onclick")
-//        val onClickValue = value.get.text
-//        val r = """return reportInappropriateComment\((\d+)\)""".r
-//        val r(theID) = onClickValue
-//        theID
-//      } else {
-//        "unknown"
-//      }
-
-        val coms = (node \ "@id").text
+        val nodeWithID = (node \ "@id").text
         val length = "sf_comment_".length
-        coms.substring(length)
+        nodeWithID.substring(length)
     }
 
     def getFrom (node : Node)  = {
-//        val coms = (node \\ "span").filter(_.attribute("class").mkString == "author")
-
+        
         val coms = (node \\ "span").filter(span => (span \ "@class").text == "sf_comment_author")
         HTMLTextUtils.cleanUp(coms.first.text)
     }
@@ -191,16 +168,11 @@ object DelfiTopicProducer extends TopicProducer {
     
     
    def getCommentText (com : scala.xml.Node) = {
-      
-       println("----------------------------")
-      
+                   
        val n = ((com \ "div").filter(
            _ \ "@class" == "comm-text") \ "div").filter( _ \ "@class" != Some)
   
-       val commentText = HTMLTextUtils.processChildren(n.first)
-       println (commentText)
-       commentText
-      
+       HTMLTextUtils.getText(n.first)
    }    
 
     

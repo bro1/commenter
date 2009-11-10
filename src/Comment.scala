@@ -10,17 +10,17 @@ class Comment (
     "Comment ID: " + remoteCommentID + "\n" +
     "Posted at: " +  postedAt + "\n" +
     "Author:" + postedBy + "\n" +
-    text    
+    text
   }
   
   override def equals(other : Any) = {
 
     other match {
-      case c : Comment => {
+      case comment : Comment => {
         if (id != -1) {
-          id == c.id
+          id == comment.id
         } else {
-          postedAt == c.postedAt && postedBy == c.postedBy        
+          postedAt == comment.postedAt && postedBy == comment.postedBy
         }
       }  
       case _ => false
@@ -38,8 +38,13 @@ class EditableComment () {
 }
 
 
+class Topic (var id : Long, val title: String, val topicType : String, val url : String) {
 
-class Topic (var id : Long, val title: String, val topicType : String, val url : String) {  
+
+  val producer : TopicProducer = topicType match {
+      case "bernardinai" => BernardinaiTopicProducer
+      case "delfi" => DelfiTopicProducer
+  }
   
   var lastChecked : Date = new Date(0);
   
@@ -105,13 +110,18 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
   def insertToDb() = {
     Data.insertTopic(this)
   }
+
+
+  def update() = {
+     producer.processComments(this)
+  }
   
 }
 
 class BernardinaiTopic(id:Long, title: String, url : String) 
-  extends Topic (id, title, "bernardinai", url) 
+  extends Topic (id, title, "bernardinai", url)
     
 
 
 class DelfiTopic (id : Long, title: String, url : String) 
-  extends Topic (id, title, "delfi", url)     
+  extends Topic (id, title, "delfi", url)

@@ -40,7 +40,7 @@ object MainApplication extends SimpleGUIApplication {
 //  var com : Topic = DelfiTopicProducer.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
 //  com.comments = com.comments.reverse
 
-  var com : Topic = null
+  var currentTopic : Topic = null
   
   def top = new MainFrame {
     title = "Komentatorius"
@@ -76,7 +76,7 @@ object MainApplication extends SimpleGUIApplication {
               peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
               
               override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {
-                 val commentTextArea = new TextArea(com.comments{row}.text) { 
+                 val commentTextArea = new TextArea(currentTopic.comments{row}.text) {
                    lineWrap = true
                    preferredViewportSize = new java.awt.Dimension(50, 60);
                    preferredSize = new java.awt.Dimension(100, 200);                   
@@ -154,9 +154,15 @@ object Actions {
         val topic = Data.getSubscribtions(){row}
         topic.getTimeOfNextUpdate
         
-       topic
+        Data.getCommentsForTopic(topic.id)
         
-        Data.getCommentsForTopic(topic.id)        
+        topic.update
+
+        currentTopic = topic
+
+               TopicModel.fireTableRowsInserted(0, 3)
+
+        //TopicModel.notify
       }
     }
   }
@@ -164,13 +170,13 @@ object Actions {
   
 object CommentsModel extends javax.swing.table.AbstractTableModel {
 
-    override def getValueAt(row : Int, col : Int) = { com.comments{row}.text }  
+    override def getValueAt(row : Int, col : Int) = { currentTopic.comments{row}.text }
       
     override def getColumnCount() = { 1 }
    
     override def getRowCount() = { 
-      if (com != null) {  
-        com.comments.length
+      if (currentTopic != null) {
+        currentTopic.comments.length
       } else {
         0
       } 

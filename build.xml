@@ -1,5 +1,7 @@
 <project name="Commenter" default="build">
 
+  <!-- <import file="nbproject/build-impl.xml"/> -->
+
   <property file="build.properties"/>
 
   <property
@@ -122,5 +124,13 @@
 	</junitreport>
     
   </target>
+
+<!--  
+  <target name="debug">
+    <ant dir="nbproject" antfile="build-impl.xml" target="debug"/>
+  </target>
+  
+  -->
+    
 
 </project>

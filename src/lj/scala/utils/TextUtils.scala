@@ -8,23 +8,27 @@ package lj.scala.utils {
 
 
 object HTMLTextUtils {
-      def processChildren(com : Node) : String = {
+
+    def getText(com : Node) : String = {
+        convertNodeToText(com).trim
+    }
+
+    private def processChildren(com : Node) : String = {
       var text = ""      
       com.child foreach { (childElement) =>  text += convertNodeToText(childElement)}       
       text
     }
     
     
-    def convertNodeToText(com : Node) : String = {
+    private def convertNodeToText(com : Node) : String = {
          
-     com.label match {
-       case "#PCDATA" => cleanUp(com.text)
-       case "br" =>  "\n"
-       case "i" => "_" + processChildren(com) +  "_"
-       case "font" => "*" + processChildren(com) + "*" 
-       case _ => processChildren(com)
-     }      
-      
+      com.label match {
+        case "#PCDATA" => cleanUp(com.text)
+        case "br" =>  "\n"
+        case "i" => "_" + processChildren(com) +  "_"
+        case "font" => "*" + processChildren(com) + "*"
+        case _ => processChildren(com)
+      }
     }
     
     def cleanUp(inputString : String) = {

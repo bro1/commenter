@@ -81,8 +81,15 @@ object TopicCache {
 }
 
 object Data {
-  
+
   val db = {
+
+    if ((new java.io.File("misc/test.db")).exists) {
+        println(new java.io.File(".").getCanonicalPath)
+        println(System.getProperty("user.dir"))
+        println("File does not exist")
+    }
+
     val nativeDriverClass = Class.forName("org.sqlite.JDBC")
     DriverManager.getConnection("jdbc:sqlite:misc/test.db")    
   }
