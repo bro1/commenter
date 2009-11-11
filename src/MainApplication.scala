@@ -37,15 +37,19 @@ object sampleComment extends CommentPanel(new Comment(-1, "id", new java.util.Da
 
 object MainApplication extends SimpleGUIApplication {
   
-//  var com : Topic = DelfiTopicProducer.process("http://www.delfi.lt/news/ringas/politics/mapavilioniene-moters-kunas-kaip-musio-laukas.d?id=24027136&com=1")
+
 //  com.comments = com.comments.reverse
 
   var currentTopic : Topic = null
   
+  //currentTopic = DelfiTopicProducer.process("file://misc/examples/delfi/str1p1.html")
+  
+  var commentsTable : MyTable = null
+  
   def top = new MainFrame {
     title = "Komentatorius"
     
-    var commentsTable : MyTable = null
+    
     
     object topicsTable extends Table() {
         model = TopicModel
@@ -88,7 +92,9 @@ object MainApplication extends SimpleGUIApplication {
               }
               
           }
-          commentsTable = CommentsTable 
+          commentsTable = CommentsTable
+          
+          
           CommentsTable
       }
     }
@@ -139,7 +145,7 @@ object MainApplication extends SimpleGUIApplication {
         if (!adjusting) {
           Actions.getTopicSelection(topicsTable.selection.cells)
         }
-      }      
+      }
     }     
   }
   
@@ -150,25 +156,25 @@ object Actions {
         
     if (cells.size == 1) {
       for ((row, col) <- cells) { 
-        println("Topic no: " + row)         
+         
         val topic = Data.getSubscribtions(){row}
-        topic.getTimeOfNextUpdate
+        
+        // TODO:
+        //topic.getTimeOfNextUpdate
         
         Data.getCommentsForTopic(topic.id)
         
         topic.update
 
         currentTopic = topic
-
-               TopicModel.fireTableRowsInserted(0, 3)
-
-        //TopicModel.notify
+        CommentsModel.fireTableDataChanged
+        
       }
     }
   }
 }  
   
-object CommentsModel extends javax.swing.table.AbstractTableModel {
+object CommentsModel extends javax.swing.table.DefaultTableModel {
 
     override def getValueAt(row : Int, col : Int) = { currentTopic.comments{row}.text }
       

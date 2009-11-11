@@ -48,7 +48,7 @@ abstract class TopicProducer {
         println("Number of comments extracted" + allComments.size)
        
     val newComments = (allComments -- topic.comments)     
-    topic.comments ++ newComments
+    topic.comments ++= newComments
     newComments
   } 
 
