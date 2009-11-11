@@ -86,15 +86,12 @@ object MainApplication extends SimpleGUIApplication {
                    preferredSize = new java.awt.Dimension(100, 200);                   
                  }
                  
-                 commentTextArea.revalidate
-                 
+                 commentTextArea.revalidate                 
                  commentTextArea
               }
               
           }
           commentsTable = CommentsTable
-          
-          
           CommentsTable
       }
     }
