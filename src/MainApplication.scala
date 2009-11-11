@@ -49,17 +49,12 @@ object MainApplication extends SimpleGUIApplication {
   def top = new MainFrame {
     title = "Komentatorius"
     
-    
-    
     object topicsTable extends Table() {
         model = TopicModel
         rowHeight = 15
  
         preferredViewportSize = new java.awt.Dimension(300, 0)
-        
-        
     }
-
     
     object nameField extends TextField { columns = 20 }
     object fahrenheit extends TextArea { rows = 6; columns = 20; border = Swing.LineBorder(java.awt.Color.BLACK)}
@@ -75,19 +70,12 @@ object MainApplication extends SimpleGUIApplication {
       contents = { 
           object CommentsTable extends MyTable() {
               model = CommentsModel
-              rowHeight = 50
+              rowHeight = 200
               
               peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
               
-              override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {
-                 val commentTextArea = new TextArea(currentTopic.comments{row}.text) {
-                   lineWrap = true
-                   preferredViewportSize = new java.awt.Dimension(50, 60);
-                   preferredSize = new java.awt.Dimension(100, 200);                   
-                 }
-                 
-                 commentTextArea.revalidate                 
-                 commentTextArea
+              override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {                
+                new CommentPanel(currentTopic.comments{row})
               }
               
           }
@@ -173,7 +161,9 @@ object Actions {
   
 object CommentsModel extends javax.swing.table.DefaultTableModel {
 
-    override def getValueAt(row : Int, col : Int) = { currentTopic.comments{row}.text }
+    override def getValueAt(row : Int, col : Int) = { 
+      currentTopic.comments{row}.text 
+    }
       
     override def getColumnCount() = { 1 }
    
@@ -186,7 +176,7 @@ object CommentsModel extends javax.swing.table.DefaultTableModel {
     
     }
    
-    override def getColumnName(col : Int) = { "Comment" } }
+    override def getColumnName(col : Int) = { "Komentaras" } }
 }
 
 object TopicModel extends javax.swing.table.AbstractTableModel {
