@@ -70,7 +70,7 @@ object MainApplication extends SimpleGUIApplication {
       contents = { 
           object CommentsTable extends MyTable() {
               model = CommentsModel
-              rowHeight = 200
+              rowHeight = 35
               
               peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
               
@@ -90,10 +90,10 @@ object MainApplication extends SimpleGUIApplication {
     object buttonSubscribe extends Button ("Subscribe")
     
     contents = new GridBagPanel {
-      layout(new Label("Vardas: ")) = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
-      layout(nameField) = new Constraints {gridx = 2; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
-      layout(new Label("Komentaras:")) =  new Constraints {gridx = 1; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
-      layout(fahrenheit) = new Constraints {gridx = 2; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
+//      layout(new Label("Vardas: ")) = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
+//      layout(nameField) = new Constraints {gridx = 2; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
+//      layout(new Label("Komentaras:")) =  new Constraints {gridx = 1; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
+//      layout(fahrenheit) = new Constraints {gridx = 2; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
       layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 2; gridwidth = 2; anchor = GridBagPanel.Anchor.East}                         
       layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 2}
 
@@ -101,7 +101,7 @@ object MainApplication extends SimpleGUIApplication {
       
       layout(commentsScrollPane) = new Constraints {grid = (1, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal; weightx=1}
       
-      layout(sampleComment) = new Constraints {grid = (1, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
+      //layout(sampleComment) = new Constraints {grid = (1, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
 
       layout(topicsScrollPane) = new Constraints {grid = (0, 0); gridheight = 5; fill = GridBagPanel.Fill.Both}
 
@@ -110,13 +110,13 @@ object MainApplication extends SimpleGUIApplication {
     listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
     
     reactions += {
-      case ValueChanged(`fahrenheit`) =>
-          println(fahrenheit.text)
-        
-      case EditDone(`nameField`) =>
-        val c = nameField.text.toInt
-        val f = c * 9 / 5 + 32
-        fahrenheit.text = f.toString
+//      case ValueChanged(`fahrenheit`) =>
+//          println(fahrenheit.text)
+//        
+//      case EditDone(`nameField`) =>
+//        val c = nameField.text.toInt
+//        val f = c * 9 / 5 + 32
+//        fahrenheit.text = f.toString
         
       case ButtonClicked(`buttonLoad`) => {
         commentsTable.updateSize
