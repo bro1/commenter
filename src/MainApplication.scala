@@ -1,59 +1,69 @@
 import swing._
 import event._
 
-class MyTable extends Table {
-  def updateSize = {
-     for (i <- 0 to (rowCount - 1)) {
-        
-       val r = rendererComponent(false, false, i, 0)       
-       
-       r.preferredSize.width = 75
-       println(r.preferredSize)
-       val c  = peer.getCellRenderer(i,0)       
-       println(c.getTableCellRendererComponent(peer, 0, false, false, i,0))
-       //peer.setRowHeight(i, r.preferredSize.height)        
-     }     
-  }
-}
-
-
 
 class CommentPanel(com : Comment) extends GridBagPanel {
   
   object commentField extends TextArea(com.text) { 
-	  lineWrap = true                   
+	  lineWrap = true
+          wordWrap = true
+          peer.setSelectionStart(120);
   }
   
-  layout(new Label(com.postedBy)) = new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both}
-  layout(new Label(com.postedAt.toString)) = new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both}
-  layout(new Button("+")) = new Constraints{gridx = 2; gridy = 0; fill = GridBagPanel.Fill.Both}
-  layout(new Button("-")) = new Constraints{gridx = 3; gridy = 0; fill = GridBagPanel.Fill.Both}
-  layout(commentField) = new Constraints{gridx = 0; gridy = 1; gridwidth = 4; fill = GridBagPanel.Fill.Both}  
-  border = Swing.EmptyBorder(15, 10, 10, 10)  
+  add({val l = new Label("a"); val s = l.preferredSize; l.preferredSize = new java.awt.Dimension((s.getWidth * 20).toInt, s.getHeight.toInt); l.text = com.postedBy; l } , new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(new Label(com.postedAt.toString), new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(new Button("+"), new Constraints{gridx = 2; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(new Button("-"), new Constraints{gridx = 3; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(commentField, new Constraints{gridx = 0; gridy = 1; gridwidth = 4; fill = GridBagPanel.Fill.Both})
+
+
+//  border = Swing.EmptyBorder(15, 10, 10, 10)
+
+border = Swing.LineBorder(java.awt.Color.DARK_GRAY)
+
+
+
 
 }
 
-object sampleComment extends CommentPanel(new Comment(-1, "id", new java.util.Date, "author", "comment L1" +"\n" + "comment line 2"))   
-
 object MainApplication extends SimpleGUIApplication {
   
-
-//  com.comments = com.comments.reverse
-
   var currentTopic : Topic = null
+
+  object CommentsPanel extends GridBagPanel {
+    def a(c : Component) = {
+
+        add(c, new Constraints{fill = GridBagPanel.Fill.Both; gridy = contents.size})
+    }
+
+    def clear() = {
+        contents.dropWhile((c) => {false})
+    }
+  }
+
+  object CommentsScroll extends ScrollPane {
+
+    preferredSize = new java.awt.Dimension(500, 600)
+
+    peer.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS)
+    peer.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER)
+    peer.getVerticalScrollBar.setUnitIncrement(20)
+
+    contents = {
+        CommentsPanel
+    }
   
-  //currentTopic = DelfiTopicProducer.process("file://misc/examples/delfi/str1p1.html")
+  }
+
+
   
-  var commentsTable : MyTable = null
   
   def top = new MainFrame {
     title = "Komentatorius"
     
     object topicsTable extends Table() {
         model = TopicModel
-        rowHeight = 15
- 
-        preferredViewportSize = new java.awt.Dimension(300, 0)
+        rowHeight = 15         
     }
     
     object nameField extends TextField { columns = 20 }
@@ -63,27 +73,11 @@ object MainApplication extends SimpleGUIApplication {
         contents = {
             topicsTable
         }
+
+        preferredSize = new java.awt.Dimension(250, 400)       
     }
-    
-    object commentsScrollPane extends ScrollPane {
-      
-      contents = { 
-          object CommentsTable extends MyTable() {
-              model = CommentsModel
-              rowHeight = 35
-              
-              peer.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION)
-              
-              override def rendererComponent(isSelected : Boolean, hasFocus : Boolean, row : Int, column : Int)  = {                
-                new CommentPanel(currentTopic.comments{row})
-              }
-              
-          }
-          commentsTable = CommentsTable
-          CommentsTable
-      }
-    }
-    
+
+     
     
     object buttonLoad extends Button ("Load")
     
@@ -94,16 +88,29 @@ object MainApplication extends SimpleGUIApplication {
 //      layout(nameField) = new Constraints {gridx = 2; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
 //      layout(new Label("Komentaras:")) =  new Constraints {gridx = 1; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
 //      layout(fahrenheit) = new Constraints {gridx = 2; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
-      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 2; gridwidth = 2; anchor = GridBagPanel.Anchor.East}                         
-      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 2}
+      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.East}
+      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0}
 
-      border = Swing.EmptyBorder(15, 10, 10, 10)
+      border = Swing.EmptyBorder(5, 5, 5, 5)
+      // was commentsScrollPane
+      layout(CommentsScroll) = new Constraints {
+          grid = (1, 1);
+          gridwidth = 2;
+          fill = scala.swing.GridBagPanel.Fill.Both;
+          weightx = 1;
+          weighty = 1
+      }
       
-      layout(commentsScrollPane) = new Constraints {grid = (1, 3); gridwidth = 2; fill = scala.swing.GridBagPanel.Fill.Horizontal; weightx=1}
-      
-      //layout(sampleComment) = new Constraints {grid = (1, 4); gridwidth = 2; fill = GridBagPanel.Fill.Both}
 
-      layout(topicsScrollPane) = new Constraints {grid = (0, 0); gridheight = 5; fill = GridBagPanel.Fill.Both}
+
+      layout(topicsScrollPane) = new Constraints {
+          grid = (0, 0);
+          gridheight = 2;
+          fill = GridBagPanel.Fill.Both;
+          weightx=0.5
+          weighty = 0.5
+      }
+
 
     }        
     
@@ -119,7 +126,7 @@ object MainApplication extends SimpleGUIApplication {
 //        fahrenheit.text = f.toString
         
       case ButtonClicked(`buttonLoad`) => {
-        commentsTable.updateSize
+//        commentsTable.updateSize
       }
       
       case ButtonClicked(`buttonSubscribe`) => {
@@ -150,10 +157,16 @@ object Actions {
         Data.getCommentsForTopic(topic.id)
         
         topic.update
-
         currentTopic = topic
         CommentsModel.fireTableDataChanged
-        
+
+        CommentsPanel.clear()
+
+        for (c <- currentTopic.comments) {
+            CommentsPanel.a(new CommentPanel(c))            
+        }
+
+        CommentsScroll.revalidate        
       }
     }
   }

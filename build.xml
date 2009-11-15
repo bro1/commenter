@@ -68,7 +68,7 @@
      <java classpathref="run.classpath" classname="Launcher" fork="true"/>
   </target>
   
-  <target name="run" description="Run the application">
+  <target name="run" description="Run the application" depends="compile">
      <java classpathref="run.classpath" classname="MainApplication" fork="true"/>
   </target>
 
