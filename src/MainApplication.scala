@@ -31,13 +31,13 @@ object MainApplication extends SimpleGUIApplication {
   var currentTopic : Topic = null
 
   object CommentsPanel extends GridBagPanel {
+    
     def a(c : Component) = {
-
         add(c, new Constraints{fill = GridBagPanel.Fill.Both; gridy = contents.size})
     }
 
     def clear() = {
-        contents.dropWhile((c) => {false})
+      peer.removeAll
     }
   }
 
