@@ -1,6 +1,17 @@
 import swing._
 import event._
 
+object SizeConstants {
+
+  val labelDimension20 = {
+    val label = new Label("a"); 
+    val singleSize = label.preferredSize; 
+    new java.awt.Dimension((singleSize.getWidth * 20).toInt, singleSize.getHeight.toInt);     
+  }
+    
+  val buttonInsets = new java.awt.Insets(2, 2, 2, 2)
+  
+}
 
 class CommentPanel(com : Comment) extends GridBagPanel {
   
@@ -10,19 +21,32 @@ class CommentPanel(com : Comment) extends GridBagPanel {
           peer.setSelectionStart(120);
   }
   
-  add({val l = new Label("a"); val s = l.preferredSize; l.preferredSize = new java.awt.Dimension((s.getWidth * 20).toInt, s.getHeight.toInt); l.text = com.postedBy; l } , new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both})
-  add(new Label(com.postedAt.toString), new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both})
-  add(new Button("+"), new Constraints{gridx = 2; gridy = 0; fill = GridBagPanel.Fill.Both})
-  add(new Button("-"), new Constraints{gridx = 3; gridy = 0; fill = GridBagPanel.Fill.Both})
-  add(commentField, new Constraints{gridx = 0; gridy = 1; gridwidth = 4; fill = GridBagPanel.Fill.Both})
+  add({val l = new Label(com.postedBy); l.preferredSize = SizeConstants.labelDimension20; l.horizontalAlignment = Alignment.Left; l } , new Constraints{gridx = 0; gridy = 0; fill = GridBagPanel.Fill.Both})
+  
+  val f = new java.text.SimpleDateFormat("yyyy MM dd HH:mm")  
+  
+  add(new Label(f.format(com.postedAt)), new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both})
+  
+  val buttonReply = new Button("R")
+  buttonReply.margin = SizeConstants.buttonInsets
+  
+  add(buttonReply, new Constraints{gridx = 2; gridy = 0; fill = GridBagPanel.Fill.Both})
+  
+  val buttonRateGood = new Button("+")
+  buttonRateGood.margin = SizeConstants.buttonInsets
+  add(buttonRateGood, new Constraints{gridx = 3; gridy = 0; fill = GridBagPanel.Fill.Both})
+  
+  val buttonRateBad = new Button("-")
+  buttonRateBad.margin = SizeConstants.buttonInsets
+
+  
+  add(buttonRateBad, new Constraints{gridx = 4; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(commentField, new Constraints{gridx = 0; gridy = 1; gridwidth = 5; fill = GridBagPanel.Fill.Both})
 
 
-//  border = Swing.EmptyBorder(15, 10, 10, 10)
+  //  border = Swing.EmptyBorder(15, 10, 10, 10)
 
-border = Swing.LineBorder(java.awt.Color.DARK_GRAY)
-
-
-
+  border = Swing.LineBorder(java.awt.Color.DARK_GRAY)
 
 }
 

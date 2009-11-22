@@ -17,7 +17,7 @@ object SubscribeToTopicWindow extends Frame {
   object buttonPannel extends FlowPanel {    
       
       contents += buttonCancel
-      contents +=  buttonSubscribe 
+      contents += buttonSubscribe 
     
   }
   

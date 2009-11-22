@@ -42,10 +42,9 @@ abstract class TopicProducer {
    * @return new comments
    */
   def processComments(topic : Topic) = {
+    
     val doc = new TagSoupFactoryAdapter load getReader(topic.url)
     val allComments = extractAllComments(doc)
-
-        println("Number of comments extracted" + allComments.size)
        
     val newComments = (allComments -- topic.comments)     
     topic.comments ++= newComments
