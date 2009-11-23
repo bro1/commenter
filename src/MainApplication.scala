@@ -43,10 +43,23 @@ class CommentPanel(com : Comment) extends GridBagPanel {
   add(buttonRateBad, new Constraints{gridx = 4; gridy = 0; fill = GridBagPanel.Fill.Both})
   add(commentField, new Constraints{gridx = 0; gridy = 1; gridwidth = 5; fill = GridBagPanel.Fill.Both})
 
-
-  //  border = Swing.EmptyBorder(15, 10, 10, 10)
-
   border = Swing.LineBorder(java.awt.Color.DARK_GRAY)
+  
+  listenTo(buttonReply, buttonRateGood, buttonRateBad)
+  
+  reactions += {
+    case ButtonClicked(`buttonReply`) => {
+      println("Reply")      
+    }
+    
+    case ButtonClicked(`buttonRateGood`) => {
+      println("Rate Good")      
+    }
+    
+    case ButtonClicked(`buttonRateBad`) => {
+      println("Rate Bad")      
+    }
+  }
 
 }
 
@@ -229,4 +242,5 @@ object TopicModel extends javax.swing.table.AbstractTableModel {
     }
    
     override def getColumnName(col : Int) = { "Topic" } }
+
 
