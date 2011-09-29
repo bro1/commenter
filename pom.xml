@@ -26,6 +26,14 @@
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
     </dependency>
+    
+            <dependency>
+            <groupId>bro1.mine</groupId>
+            <artifactId>minej</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+    
     <!-- Test -->
     <dependency>
       <groupId>junit</groupId>
