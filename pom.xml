@@ -5,7 +5,7 @@
   <artifactId>commenter</artifactId>
   <version>1.0-SNAPSHOT</version>
   <name>${project.artifactId}</name>
-  <description>Commenter</description>
+  <description>An application that allows to use comments system of several news web sites as a chat.</description>
   <inceptionYear>2010</inceptionYear>
   <licenses>
     <license>
@@ -117,8 +117,8 @@
         <configuration>
           <programs>
             <program>
-              <mainClass>bro1.App</mainClass>
-              <name>musicmover</name>
+              <mainClass>MainApplication</mainClass>
+              <name>commenter</name>
             </program>
           </programs>
           <binFileExtensions>

@@ -84,11 +84,14 @@ object Data {
 
   val db = {
 
-    if (!(new java.io.File("misc/test.db")).exists) {
-        println("Test DB file does not exist")
+    
+    val f = new java.io.File("misc/test.db")
+    
+    if (!(f).exists) {
+        println("Test DB file does not exist. Expected location: " + f.getCanonicalPath)
     }
 
-    val nativeDriverClass = Class.forName("org.sqlite.JDBC")
+    val nativeDriverClass = Class.forName("org.sqlite.JDBC")    
     DriverManager.getConnection("jdbc:sqlite:misc/test.db")    
   }
   
