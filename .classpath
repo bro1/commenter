@@ -32,5 +32,6 @@
 	<classpathentry kind="var" path="M2_REPO/xerces/xmlParserAPIs/2.6.2/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="var" path="M2_REPO/xom/xom/1.0/xom-1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="var" path="M2_REPO/org/scala-lang/scala-swing/2.9.1/scala-swing-2.9.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
