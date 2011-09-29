@@ -1,4 +1,3 @@
-
 import java.net.URI
 import java.sql.DriverManager
 
@@ -85,9 +84,9 @@ object Data {
   val db = {
 
     
-    val f = new java.io.File("misc/test.db")
+    val f = new java.io.File("misc/test.db")    
     
-    if (!(f).exists) {
+    if (!f.exists) {
         println("Test DB file does not exist. Expected location: " + f.getCanonicalPath)
     }
 
