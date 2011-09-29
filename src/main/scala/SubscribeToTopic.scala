@@ -32,7 +32,7 @@ object SubscribeToTopicWindow extends Frame {
     layout(new Label("Topic Name: ")) = new Constraints {gridx = 0; gridy = 2; gridwidth = 2; fill = GridBagPanel.Fill.Both }
     layout(new Label("Topic Type: ")) = new Constraints {gridx = 0; gridy = 3; gridwidth = 2; fill = GridBagPanel.Fill.Both }
     
-    layout(buttonPannel) = new Constraints {gridx = 0; gridy = 4; gridwidth = 2; anchor = GridBagPanel.Anchor.CENTER }    
+    layout(buttonPannel) = new Constraints {gridx = 0; gridy = 4; gridwidth = 2 /*;anchor = GridBagPanel.Anchor.CENTER */}    
     
   }
   

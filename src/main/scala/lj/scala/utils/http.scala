@@ -1,6 +1,6 @@
 package lj.scala.utils
 
-import bro1.mine.http.HttpUtil
+import bro1.utils.http.HttpUtil
 
 object http {
 

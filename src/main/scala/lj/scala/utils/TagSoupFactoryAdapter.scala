@@ -63,6 +63,7 @@ trait NonBindingFactoryAdapter extends FactoryAdapter
       concrete subclasses */
   def getReader() : XMLReader;
 
+/*
   override def loadXML(source : InputSource) : Node = {
     val reader = getReader()
     reader.setContentHandler(this)
@@ -71,6 +72,7 @@ trait NonBindingFactoryAdapter extends FactoryAdapter
     scopeStack.pop
     return rootElem
   }
+  */
 }
 
                                
