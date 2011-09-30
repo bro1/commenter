@@ -119,8 +119,7 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
 }
 
 class BernardinaiTopic(id:Long, title: String, url : String) 
-  extends Topic (id, title, "bernardinai", url)
-    
+  extends Topic (id, title, "bernardinai", url)   
 
 
 class DelfiTopic (id : Long, title: String, url : String) 

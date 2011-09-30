@@ -79,7 +79,11 @@ object BernardinaiTopicProducer extends TopicProducer {
     }
     
     def createTopic(id : Long, url : String, doc: Node) = {
-      new BernardinaiTopic(id, url, url)
+      
+      /** TODO - get real title */
+      val title = url
+      
+      new BernardinaiTopic(id, title, url)
     }
     
     
@@ -184,25 +188,12 @@ object DelfiTopicProducer extends TopicProducer {
     
    def getCommentText (com : scala.xml.Node) = {
 
-     val n = (com \ "div")
-     val z = n.filter(div => (div \ "@class").text == "comm-text")
-     val zz = z \ "div"
-     val g = zz.filter(div => (div \ "@class").isEmpty)
-     
-     //println(g)
-/*     
-     println(n)
-     
-     println(z)
-     
-     println(g)
-  */   
-     /*
-       val n = ((com \ "div").filter(
-           _ \ "@class" == "comm-text") \ "div").filter(div => (div \ "@class").isEmpty)
-           */
+     val divs = (com \ "div")
+     val commentDivs = divs.filter(div => (div \ "@class").text == "comm-text")
+     val innerCommentDivs = commentDivs \ "div"
+     val divsWithNoClass = innerCommentDivs.filter(div => (div \ "@class").isEmpty)     
   
-       HTMLTextUtils.getText(g.first)
+     HTMLTextUtils.getText(divsWithNoClass.first)
    }    
 
     
