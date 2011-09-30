@@ -84,14 +84,16 @@ object Data {
   val db = {
 
     
-    val f = new java.io.File("misc/test.db")    
+    val dbLocation = "../../../misc/test.db"
+    
+    val f = new java.io.File(dbLocation)    
     
     if (!f.exists) {
         println("Test DB file does not exist. Expected location: " + f.getCanonicalPath)
     }
 
     val nativeDriverClass = Class.forName("org.sqlite.JDBC")    
-    DriverManager.getConnection("jdbc:sqlite:misc/test.db")    
+    DriverManager.getConnection("jdbc:sqlite:" + f.getCanonicalPath())    
   }
   
   def subscribe(name : String, topicType : String, url : String) = { 

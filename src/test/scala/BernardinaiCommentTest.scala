@@ -1,17 +1,24 @@
-/*
- * BernardinaiCommentTest.scala
- *
- * To change this template, choose Tools | Template Manager
- * and open the template in the editor.
- */
-
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.Assert._
+import java.util.{Calendar, GregorianCalendar, TimeZone}
 
 import lj.scala.utils.TagSoupFactoryAdapter
+
+object TestUtil {
+  
+  private val tz = java.util.TimeZone.getTimeZone("Europe/Vilnius")  
+  
+  def getTimeLT(year : Int, month : Int, day : Int, hour : Int, minute : Int, second : Int) = {
+    
+        val postedAt = new java.util.GregorianCalendar(tz)
+        postedAt.set(year, month, day, hour, minute, second)
+        postedAt.set(Calendar.MILLISECOND, 0)
+        
+        postedAt
+  	}
+}
 
 class BernardinaiCommentTest {
 
@@ -36,7 +43,9 @@ class BernardinaiCommentTest {
 
         assertEquals("Comments size should be 8", 8, comments.size)
         assertEquals("Geras Ateistas", (comments{0}.postedBy))
-        val postedAt = new java.util.GregorianCalendar(2009, 10, 6, 11, 05, 00)
+        
+        val postedAt = TestUtil.getTimeLT(2009, 10, 6, 0, 5, 0)
+        
         assertEquals(postedAt.getTime, (comments{0}.postedAt))
         assertEquals("100739", comments{0}.remoteCommentID)
 
@@ -48,7 +57,7 @@ class BernardinaiCommentTest {
 
         // Also check the last comment
 
-        val lastCommentPostedAt = new java.util.GregorianCalendar(2009, 10, 5, 10, 14, 00)
+        val lastCommentPostedAt = TestUtil.getTimeLT(2009, 10, 4, 23, 14, 00)
         assertEquals("drager", (comments{7}.postedBy))
         assertEquals(lastCommentPostedAt.getTime, (comments{7}.postedAt))
 
@@ -75,7 +84,7 @@ class DelfiCommentTest {
         val firstComment = comments{0}
 
         assertEquals("to Arnas", (firstComment.postedBy))
-        val firstCommentPostedAt = new java.util.GregorianCalendar(2009, 8, 13, 20, 36, 00)
+        val firstCommentPostedAt = TestUtil.getTimeLT(2009, 8, 13, 11, 36, 00)
         assertEquals(firstCommentPostedAt.getTime, (firstComment.postedAt))
         assertEquals("24022150", firstComment.remoteCommentID)
 
@@ -86,7 +95,7 @@ class DelfiCommentTest {
 
         // Also check the last comment
 
-        val lastCommentPostedAt = new java.util.GregorianCalendar(2009, 8, 13, 8, 31, 00)
+        val lastCommentPostedAt = TestUtil.getTimeLT(2009, 8, 12, 23, 31, 00)
 
         val lastComment = comments{19}
 
@@ -94,5 +103,5 @@ class DelfiCommentTest {
         assertEquals(lastCommentPostedAt.getTime, (lastComment.postedAt))
 
     }
-   
+       
 }

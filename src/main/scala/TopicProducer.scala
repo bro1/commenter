@@ -17,7 +17,13 @@ abstract class TopicProducer {
     if(url.startsWith("file://")) {
       
       val fileName = url.substring(7)
-      new FileReader (new File(fileName))
+      val file = new File(fileName)
+      
+      if (!file.exists()) {
+        println("File Not found:" + file.getCanonicalPath())
+      }      
+      
+      new FileReader (file)
 
     } else {
       
@@ -150,7 +156,17 @@ object DelfiTopicProducer extends TopicProducer {
 
     
     def extractAllComments(doc : Node) : List[Comment] = {
-       val comments = (doc \\ "div").filter( _ \ "@class" == "comm-container")
+       val comments = (doc \\ "div").filter(div => {
+         /*
+    	   println(div)
+    	   print("class: ")
+           print(div \ "@class")
+           println((div \ "@class").text)*/
+           (div \ "@class").text.contains("comm-container")
+       	})
+       	
+       	println("size " + comments.length)
+       
        (for{com <- comments} yield  extractComment(com)).toList
     }     
      
@@ -167,11 +183,26 @@ object DelfiTopicProducer extends TopicProducer {
     
     
    def getCommentText (com : scala.xml.Node) = {
-                   
+
+     val n = (com \ "div")
+     val z = n.filter(div => (div \ "@class").text == "comm-text")
+     val zz = z \ "div"
+     val g = zz.filter(div => (div \ "@class").isEmpty)
+     
+     //println(g)
+/*     
+     println(n)
+     
+     println(z)
+     
+     println(g)
+  */   
+     /*
        val n = ((com \ "div").filter(
-           _ \ "@class" == "comm-text") \ "div").filter( _ \ "@class" != Some)
+           _ \ "@class" == "comm-text") \ "div").filter(div => (div \ "@class").isEmpty)
+           */
   
-       HTMLTextUtils.getText(n.first)
+       HTMLTextUtils.getText(g.first)
    }    
 
     

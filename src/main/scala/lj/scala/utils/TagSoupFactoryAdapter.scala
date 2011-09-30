@@ -3,6 +3,7 @@ import _root_.scala.xml.parsing.FactoryAdapter
 import _root_.scala.xml.factory.NodeFactory
 import _root_.scala.xml.{Elem,MetaData,NamespaceBinding,
        Node,Text,TopScope}
+import _root_.scala.xml.SAXParser
 
 import _root_.org.xml.sax.{XMLReader,InputSource}
 
@@ -57,14 +58,14 @@ trait NonBindingFactoryAdapter extends FactoryAdapter
 }
 
 
-                               trait SAXFactoryAdapter extends NonBindingFactoryAdapter {
+trait SAXFactoryAdapter extends NonBindingFactoryAdapter {
 
   /** The method [getReader] has to implemented by
       concrete subclasses */
   def getReader() : XMLReader;
 
-/*
-  override def loadXML(source : InputSource) : Node = {
+
+  override def loadXML(source : InputSource, parser : SAXParser) : Node = {
     val reader = getReader()
     reader.setContentHandler(this)
     scopeStack.push(TopScope)
@@ -72,7 +73,7 @@ trait NonBindingFactoryAdapter extends FactoryAdapter
     scopeStack.pop
     return rootElem
   }
-  */
+
 }
 
                                
