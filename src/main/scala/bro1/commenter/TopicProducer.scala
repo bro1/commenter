@@ -1,23 +1,39 @@
+package bro1.commenter
+
 import java.io.{File,FileReader,StringReader}
 import java.text.{SimpleDateFormat}
 import java.util.Date
 import scala.xml._
 import lj.scala.utils.HTMLTextUtils
 import lj.scala.utils.TagSoupFactoryAdapter
+import java.net.URL
 
 import java.util.TimeZone
 
+object TopicProducerFactory {
+  
+  val producers = List(BernardinaiTopicProducer, DelfiTopicProducer)
+  
+  def getInstance(url : URL) = {
+    producers.find(_.accepts(url))
+    
+  }
+}
 
 abstract class TopicProducer {
+  
+  def accepts(url : URL) : Boolean
+  
+  def getTitle(url : URL) : String
  
   def getReader(url : String) : java.io.Reader = {
     
-    var reader : java.io.Reader = null;
+    //val reader : java.io.Reader = null;
     
     if(url.startsWith("file://")) {
       
       val fileName = url.substring(7)
-      val file = new File(fileName)
+      val file = new File(fileName)     
       
       if (!file.exists()) {
         println("File Not found:" + file.getCanonicalPath())
@@ -70,7 +86,25 @@ object BernardinaiTopicProducer extends TopicProducer {
         // delfiLinks
         bernardinaiComments 
     }
-
+    
+    @Override
+    def accepts(url : URL) = {
+      url.getHost() == "www.bernardinai.lt"
+    }
+    
+    @Override
+    def getTitle(url : URL) = {
+    	val doc = new TagSoupFactoryAdapter load getReader(url.toString())
+    	val titleElement = (doc \\ "title").text
+    	
+    	val  toDrop = " - Bernardinai.lt"
+    	
+    	if (titleElement.endsWith(toDrop)) {
+    		titleElement.dropRight(toDrop.length())
+    	} else {
+    	  titleElement
+    	}
+    }
 
     def bernardinaiComments = {
       
@@ -222,6 +256,17 @@ object DelfiTopicProducer extends TopicProducer {
               
    def getFrom(com : scala.xml.Node) = {
       ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text
-   } 
+   }
+   
+   @Override
+    def accepts(url : URL) = {
+      url.getHost() == "www.delfi.lt"
+    }
+
+   @Override
+   def getTitle(url : URL) = {
+     // TODO: implement this
+     ""
+   }
   
 }

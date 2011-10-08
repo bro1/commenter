@@ -1,3 +1,5 @@
+package bro1.commenter
+
 import swing._
 import event._
 

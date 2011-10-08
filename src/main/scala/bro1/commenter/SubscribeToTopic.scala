@@ -1,3 +1,5 @@
+package bro1.commenter
+
 import java.net.URI
 import java.sql.DriverManager
 
@@ -19,33 +21,38 @@ object SubscribeToTopicWindow extends Frame {
   }
 
   object urlField extends TextField { columns = 20 }
+  
+  object nameField extends TextField {columns = 20}
 
   contents = new GridBagPanel {
 
-    layout(new Label("Vardas: ")) = new Constraints { gridx = 0; gridy = 0 }
+    layout(new Label("URL: ")) = new Constraints { gridx = 0; gridy = 0 }
     layout(urlField) = new Constraints { gridx = 1; gridy = 0; }
-    layout(new Label("Topic Name: ")) = new Constraints { gridx = 0; gridy = 2; gridwidth = 2; fill = GridBagPanel.Fill.Both }
-    layout(new Label("Topic Type: ")) = new Constraints { gridx = 0; gridy = 3; gridwidth = 2; fill = GridBagPanel.Fill.Both }
+    layout(new Label("Topic Name: ")) = new Constraints { gridx = 0; gridy = 1;  fill = GridBagPanel.Fill.Both }
+    layout(nameField) = new Constraints { gridx = 1; gridy = 1; }
+    layout(new Label("Topic Type: ")) = new Constraints { gridx = 0; gridy = 2; gridwidth = 2; fill = GridBagPanel.Fill.Both }
 
     layout(buttonPannel) = new Constraints { gridx = 0; gridy = 4; gridwidth = 2; anchor = GridBagPanel.Anchor.Center }
 
   }
 
-  listenTo(buttonCancel, buttonSubscribe)
+  listenTo(buttonCancel, buttonSubscribe, urlField)
 
   reactions += {
     case ButtonClicked(`buttonCancel`) => {
       SubscribeToTopicWindow.visible = false
     }
 
-    case ButtonClicked(`buttonSubscribe`) => {
+    case ButtonClicked(`buttonSubscribe`) => {      
       subscribe(urlField.text)
       SubscribeToTopicWindow.visible = false
+    }    
+    
+    case ValueChanged(`urlField`) => {
+      
+      println("Edit done:" + urlField.text)
     }
-
-    case EditDone(`urlField`) => {
-      println("Edit done")
-    }
+    
 
   }
 
@@ -54,6 +61,42 @@ object SubscribeToTopicWindow extends Frame {
   }
 
 }
+
+
+object TopicHelper {
+  def updateName(name : TextField, url : TextField) {
+    if (!name.text.isEmpty() && isValidURL(url)) {
+    	 
+    }
+  }
+  
+  /** 
+   * Check if URL is non-empty parsable URL. 
+   * */
+  def isValidURL(url : TextField) = {
+    url.text.isEmpty();
+    
+    val a = try { 
+    	Option(new java.net.URL(url.text))
+    } catch {
+      case _ => None
+    }
+    
+    a.isDefined
+    
+  }
+  
+  
+  def getName(urlField : TextField) = {
+    val url = new java.net.URL(urlField.text)
+    val t = TopicProducerFactory.getInstance(url)
+    if (t.isDefined) {
+       // TODO: implement retrieval of topic name
+    }
+  }
+  
+}
+
 
 object SubscribeToTopic {
 
@@ -71,10 +114,10 @@ object Data {
 
   val db = {
 
-    val a = new scala.sys.SystemProperties
+    val systemProperties = new scala.sys.SystemProperties
     
     val prefix = {      
-      val sysPrefix = a.get("commenter.prefix")            
+      val sysPrefix = systemProperties.get("commenter.prefix")            
       if (sysPrefix.isDefined) {
         sysPrefix.get
       } else {
