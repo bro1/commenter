@@ -155,10 +155,7 @@ object MainApplication extends SimpleGUIApplication {
     
     listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
     
-    reactions += {
-//      case ValueChanged(`fahrenheit`) =>
-//          println(fahrenheit.text)
-//        
+    reactions += {   
 //      case EditDone(`nameField`) =>
 //        val c = nameField.text.toInt
 //        val f = c * 9 / 5 + 32

@@ -39,9 +39,10 @@ class SubscribeTest {
     
     @Test
     def testAccepts() {
-      assertTrue(BernardinaiTopicProducer.accepts(new URL("http://www.bernardinai.lt/aa")))
-      assertTrue(BernardinaiTopicProducer.accepts(new URL("https://www.bernardinai.lt/aa")))
-      assertFalse(BernardinaiTopicProducer.accepts(new URL("https://www.bernardinas.lt/aa")))
+      assertTrue(BernardinaiTopicProducer.accepts(new URL("http://www.bernardinai.lt/straipsnis/2000-01-01-*/123")))
+      assertTrue(BernardinaiTopicProducer.accepts(new URL("file://www.bernardinai.lt/bernardinai/straipsniai/comments")))
+      assertFalse(BernardinaiTopicProducer.accepts(new URL("file://blah")))
+      
       
       assertTrue(DelfiTopicProducer.accepts(new URL("http://www.delfi.lt/aa")))
       assertTrue(DelfiTopicProducer.accepts(new URL("https://www.delfi.lt/aa")))
@@ -53,6 +54,25 @@ class SubscribeTest {
       assertEquals("Rima Malickaitė. Didžiausias poreikis – įgyti racionalų tikėjimo pamatą", 
          BernardinaiTopicProducer.getTitle(new URL("file://misc/examples/bernardinai/bernardinai-20110929.html")))
     }
+
+    @Test
+    def testBernardinaiURLPatternMatch() {
+      val a = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/70152")
+      assertTrue(BernardinaiTopicProducer.matchesPattern(a))
+      
+      
+      val b = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/70152/comments")
+      assertTrue(BernardinaiTopicProducer.matchesPattern(b))
+      
+      val c = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/abc/comments")
+      assertFalse(BernardinaiTopicProducer.matchesPattern(c))
+      
+      val d = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/123/commentsabc")
+      assertFalse(BernardinaiTopicProducer.matchesPattern(d))
+    }
+    
+
+    
        
 }
  

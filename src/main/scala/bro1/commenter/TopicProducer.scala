@@ -1,9 +1,9 @@
 package bro1.commenter
 
+import scala.xml._
 import java.io.{File,FileReader,StringReader}
 import java.text.{SimpleDateFormat}
 import java.util.Date
-import scala.xml._
 import lj.scala.utils.HTMLTextUtils
 import lj.scala.utils.TagSoupFactoryAdapter
 import java.net.URL
@@ -15,8 +15,7 @@ object TopicProducerFactory {
   val producers = List(BernardinaiTopicProducer, DelfiTopicProducer)
   
   def getInstance(url : URL) = {
-    producers.find(_.accepts(url))
-    
+    producers.find(_.accepts(url))    
   }
 }
 
@@ -37,7 +36,7 @@ abstract class TopicProducer {
       
       if (!file.exists()) {
         println("File Not found:" + file.getCanonicalPath())
-      }      
+      }
       
       new FileReader (file)
 
@@ -76,6 +75,7 @@ abstract class TopicProducer {
   def createTopic(id : Long, url : String, doc : Node) : Topic
   
   def extractAllComments(doc : Node) : List[Comment]
+  
 }
 
 
@@ -88,8 +88,18 @@ object BernardinaiTopicProducer extends TopicProducer {
     }
     
     @Override
-    def accepts(url : URL) = {
-      url.getHost() == "www.bernardinai.lt"
+    def accepts(url : URL) = {     
+      (url.getProtocol() == "file" && url.toString.contains("bernardinai")) ||  matchesPattern(url)        
+    }
+    
+    def matchesPattern(url : URL) : Boolean = {
+      
+      val urlPattern = """http://www\.bernardinai\.lt/straipsnis/\d{4}-\d{2}-\d{2}-.*/(\d+)(/comments)?""".r
+      
+      url.toString() match { 
+        case urlPattern(c, d) => true
+        case _ => false
+      }       
     }
     
     @Override
@@ -270,3 +280,5 @@ object DelfiTopicProducer extends TopicProducer {
    }
   
 }
+
+

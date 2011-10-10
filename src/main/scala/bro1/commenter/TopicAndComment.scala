@@ -50,7 +50,7 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
   
   var lastChecked : Date = new Date(0);
   
-  var comments :  List[Comment] = List()
+  var comments :  List[Comment] = Nil
   
   def getTimeOfNextUpdate = {
     val latestCommentDate : java.util.Date = getLatestCommentDate();
@@ -66,34 +66,11 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
    * Get posting frequency of the last 10 comments.
    */
   def getFrequencyInSeconds() = {
-    val lastComments = getLast10Comments();
-    
-    var frequencies : List[Long] = List(); 
-    
-    if(!lastComments.isEmpty) {
-    
-      lastComments.reduceLeft{
-        (a: Comment, b: Comment)=> {      
-          frequencies = (a.postedAt.getTime - b.postedAt.getTime) :: frequencies 
-          b;
-        }
-      }
+          
+    getFrequencyList() match {
+      case Nil => 0
+      case list => {list.sum / list.size}
     }
-    
-    println(frequencies)
-    
-    val size = frequencies.size    
-    
-    if (size != 0) {
-      val sum = (0L :: frequencies).reduceLeft((a:Long, b:Long) => {
-        a + b
-      })
-      
-      sum / size
-    } else {
-      0
-    }
-    
   }
   
   def getLast10Comments() = {
@@ -116,6 +93,23 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
 
   def update() = {
      producer.processComments(this)
+  }
+  
+  private def getFrequencyList(): List[Long] = {
+    
+    val lastComments = getLast10Comments();    
+    var frequencies : List[Long] = Nil; 
+    
+    if(!lastComments.isEmpty) {
+    
+      lastComments.reduceLeft{
+        (a: Comment, b: Comment)=> {      
+          frequencies ::= (a.postedAt.getTime - b.postedAt.getTime) / 1000 
+          b;
+        }
+      }
+    }
+    frequencies
   }
   
 }

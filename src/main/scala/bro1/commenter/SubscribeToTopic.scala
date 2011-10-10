@@ -2,12 +2,15 @@ package bro1.commenter
 
 import java.net.URI
 import java.sql.DriverManager
+import scala.actors.Actor
 
 import swing._
 import event._
 
-object SubscribeToTopicWindow extends Frame {
+object SubscribeToTopicWindow extends Frame {  
   title = "Subscribe to Article"
+  
+  TopicNameActor.start()
 
   object buttonCancel extends Button("Cancel")
 
@@ -20,9 +23,9 @@ object SubscribeToTopicWindow extends Frame {
 
   }
 
-  object urlField extends TextField { columns = 20 }
+  object urlField extends TextField {columns = 60}
   
-  object nameField extends TextField {columns = 20}
+  object nameField extends TextField {columns = 60}
 
   contents = new GridBagPanel {
 
@@ -48,9 +51,9 @@ object SubscribeToTopicWindow extends Frame {
       SubscribeToTopicWindow.visible = false
     }    
     
-    case ValueChanged(`urlField`) => {
-      
+    case EditDone(`urlField`) => {      
       println("Edit done:" + urlField.text)
+      TopicHelper.updateName(nameField, urlField)
     }
     
 
@@ -64,9 +67,10 @@ object SubscribeToTopicWindow extends Frame {
 
 
 object TopicHelper {
-  def updateName(name : TextField, url : TextField) {
-    if (!name.text.isEmpty() && isValidURL(url)) {
-    	 
+  def updateName(nameField : TextField, urlField : TextField) {
+    if (nameField.text.isEmpty() && isValidURL(urlField)) {
+      TopicNameActor ! urlField.text
+      
     }
   }
   
@@ -76,22 +80,24 @@ object TopicHelper {
   def isValidURL(url : TextField) = {
     url.text.isEmpty();
     
-    val a = try { 
-    	Option(new java.net.URL(url.text))
+    val option = try {
+      val articleURL = new java.net.URL(url.text) 
+      Option(articleURL)
     } catch {
       case _ => None
     }
     
-    a.isDefined
-    
+    option.isDefined    
   }
   
   
-  def getName(urlField : TextField) = {
-    val url = new java.net.URL(urlField.text)
+  def getName(urlString : String) = {
+    val url = new java.net.URL(urlString)
     val t = TopicProducerFactory.getInstance(url)
     if (t.isDefined) {
-       // TODO: implement retrieval of topic name
+      Option(t.get.getTitle(url))
+    } else {
+      None
     }
   }
   
@@ -106,134 +112,35 @@ object SubscribeToTopic {
 
 }
 
-object TopicCache {
-  var topics: List[Topic] = List()
-}
 
-object Data {
 
-  val db = {
-
-    val systemProperties = new scala.sys.SystemProperties
-    
-    val prefix = {      
-      val sysPrefix = systemProperties.get("commenter.prefix")            
-      if (sysPrefix.isDefined) {
-        sysPrefix.get
-      } else {
-        "../../.."
-      }
-    }
-
-    val dbLocation = prefix + "/misc/test.db"
-    val f = new java.io.File(dbLocation)
-
-    if (!f.exists) {
-      println("Test DB file does not exist. Expected location: " + f.getCanonicalPath)
-      throw new Exception("Main database not found")
-    }
-
-    val nativeDriverClass = Class.forName("org.sqlite.JDBC")
-    DriverManager.getConnection("jdbc:sqlite:" + f.getCanonicalPath())
-  }
-
-  def subscribe(name: String, topicType: String, url: String) = {
-
-    val ps = db.prepareStatement("insert into topic(name, topictype, url) values (?, ?, ?)");
-    var i: Int = 1
-    ps.setString(i, name); i += 1
-    ps.setString(i, topicType); i += 1
-    ps.setString(i, url); i += 1
-
-    val r = ps.executeUpdate
-    var idr = ps.getGeneratedKeys
-
-    if (idr.next) {
-      Some(idr.getInt(1))
-    } else {
-      None
-    }
-
-  }
-
-  def getSubscribtions() = {
-    val ps = db.prepareStatement("select id, name, topictype, url from topic")
-    val res = ps.executeQuery
-
-    var topicSubscriptions: List[Topic] = List()
-
-    while (res.next) {
-
-      val id = res.getLong(1)
-      val name = res.getString(2)
-      val topicType = res.getString(3)
-      val url = res.getString(4)
-
-      topicSubscriptions = new Topic(id, name, topicType, url) :: topicSubscriptions
-
-    }
-
-    topicSubscriptions
-
-  }
-
-  def getCommentsForTopic(id: Long) = {
-
-    var comments: List[Comment] = Nil
-
-    val ps = db.prepareStatement("""
-            select c.* from comment c 
-            join topic t on t.id = c.topicid
-            where t.id = ?""")
-    ps.setLong(1, id)
-    val rs = ps.executeQuery
-    while (rs.next) {
-      val time = rs.getDate("time")
-      val commentText = rs.getString("comment")
-      val id = rs.getInt("id")
-      val remoteCommentID = rs.getString("remotecommentid")
-      val postedBy = rs.getString("author")
-
-      comments ::= new Comment(id, remoteCommentID, time, postedBy, commentText)
-    }
-
-    comments
-
-  }
-
-  def saveTopic(topic: Topic) = {
-    val ps = db.prepareStatement("""update topic set lastchecked = ? where  id = ?""")
-
-    val lastChecked = new java.sql.Date(topic.lastChecked.getTime)
-
-    ps.setDate(1, lastChecked)
-    ps.setLong(2, topic.id)
-
-    ps.execute
-  }
-
-  def insertTopic(topic: Topic) = {
-    val ps = db.prepareStatement("""insert into topic (name, topictype, url) values (?, ?, ?)""")
-    ps.setString(1, topic.title)
-    ps.setString(2, topic.topicType)
-    ps.setString(3, topic.url)
-
-    ps.execute
-
-    topic.id = lastID
-
-    TopicCache.topics ::= topic
-  }
-
-  val lastIDStatement = db.prepareStatement("""select last_insert_rowid()""")
-
-  def lastID: Long = {
-    val rs = lastIDStatement.executeQuery
-    rs.next
-    val id = rs.getLong(1)
-    if (id == 0) throw new Exception("cannot read an ID - got 0")
-    return id
-  }
-
-}
+/**
+ * This actor gets the name from the URL and then updates the 
+ * name TextField
+ */
+ object TopicNameActor extends Actor {
+   
+   def act() {
+     while(true) {
+       receive {
+         case msg : String => {
+           getNameAndUpdateTextField(msg)
+         }
+       }
+     }
+   } 
+   
+   private def getNameAndUpdateTextField(msg: String): Unit = {           
+     val name = try { 
+	    	   TopicHelper.getName(msg)
+	    	 } catch {
+	    	   case _ => None 
+	    	 }
+     
+     if (name.isDefined) {	    	   
+       SubscribeToTopicWindow.nameField.text = name.get
+     }
+   }
+   
+ } 
 
