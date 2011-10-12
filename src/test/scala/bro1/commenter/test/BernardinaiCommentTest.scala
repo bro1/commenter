@@ -36,7 +36,7 @@ class BernardinaiCommentTest {
         
         val postedAt = TestUtil.getTimeLT(2009, 10, 6, 0, 5, 0)
         
-        assertEquals(postedAt.getTime, (comments{0}.postedAt))
+        assertEquals(postedAt.getTime, (comments{0}.timeStamp))
         assertEquals("100739", comments{0}.remoteCommentID)
 
         val text = comments{0}.text
@@ -49,7 +49,7 @@ class BernardinaiCommentTest {
 
         val lastCommentPostedAt = TestUtil.getTimeLT(2009, 10, 4, 23, 14, 00)
         assertEquals("drager", (comments{7}.postedBy))
-        assertEquals(lastCommentPostedAt.getTime, (comments{7}.postedAt))
+        assertEquals(lastCommentPostedAt.getTime, (comments{7}.timeStamp))
 
     }
     
@@ -69,7 +69,7 @@ class BernardinaiCommentTest {
         
         val postedAt = TestUtil.getTimeLT(2011, 8, 30, 2, 32, 0)
         
-        assertEquals(postedAt.getTime, (comments{0}.postedAt))
+        assertEquals(postedAt.getTime, (comments{0}.timeStamp))
         assertEquals("156524", comments{0}.remoteCommentID)
 
         val text = comments{0}.text        
@@ -82,7 +82,7 @@ class BernardinaiCommentTest {
 
         val lastCommentPostedAt = TestUtil.getTimeLT(2011, 8, 29, 22, 54, 0)
         assertEquals("Jahja", (comments{7}.postedBy))
-        assertEquals(lastCommentPostedAt.getTime, (comments{7}.postedAt))
+        assertEquals(lastCommentPostedAt.getTime, (comments{7}.timeStamp))
 
       
     }

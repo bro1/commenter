@@ -5,16 +5,20 @@ import java.util.Date
 
 class Comment (
   val id : Int,
-  val remoteCommentID : String, val postedAt : Date, val postedBy  : String , val text : String) {
+  val remoteCommentID : String, val timeStamp : Date, val postedBy  : String , val text : String) {
   
   override def toString = {
     "id" + id + "\n" +
     "Comment ID: " + remoteCommentID + "\n" +
-    "Posted at: " +  postedAt + "\n" +
+    "Posted at: " +  timeStamp + "\n" +
     "Author:" + postedBy + "\n" +
     text
   }
-  
+
+  /** 
+   * Equality is checked based on ID and then if ID is -1 we check 
+   * the comment's time and author. 
+   */
   override def equals(other : Any) = {
 
     other match {
@@ -22,7 +26,7 @@ class Comment (
         if (id != -1) {
           id == comment.id
         } else {
-          postedAt == comment.postedAt && postedBy == comment.postedBy
+          timeStamp == comment.timeStamp && postedBy == comment.postedBy
         }
       }  
       case _ => false
@@ -42,7 +46,6 @@ class EditableComment () {
 
 class Topic (var id : Long, val title: String, val topicType : String, val url : String) {
 
-
   val producer : TopicProducer = topicType match {
       case "bernardinai" => BernardinaiTopicProducer
       case "delfi" => DelfiTopicProducer
@@ -52,14 +55,46 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
   
   var comments :  List[Comment] = Nil
   
-  def getTimeOfNextUpdate = {
-    val latestCommentDate : java.util.Date = getLatestCommentDate();
+  /**
+   * The next update
+   */
+  def getNextUpdate() : Option[Date] = {
     
-    val frequency = getFrequencyInSeconds();
+    val latestCommentDate : Date = getLatestCommentDate()    
+    val frequency = getFrequencyInSeconds()
+
+    if (latestCommentDate.equals(new Date(0))) {
+       if (lastChecked.equals(new Date(0))) {
+         Some(new Date())
+       } else {
+         Some(new Date(lastChecked.getTime() + 20l * 60 * 1000))  
+       }
+    } else {    
+    	val twoDaysLater = new Date(latestCommentDate.getTime() + 2l * 24 * 60 * 60 * 1000)
+	    if (lastChecked after twoDaysLater) {
+	      None
+	    } else {
+	      val next = new Date(latestCommentDate.getTime() + frequency * 1000l)
+	      if (next.after(lastChecked)) {
+	        Some(next)
+	      } else {	
+	        val s = (lastChecked.getTime() - latestCommentDate.getTime()) / 1000
+	        val f = (frequency + s) / 2
+	        Some(new Date(lastChecked.getTime() + f * 1000L))	        	        
+	      }
+	    }
+    }
+        
   }
   
   def getLatestCommentDate() = {
-    new java.util.Date()
+    comments match {
+    	case Nil => new Date(0)
+    	case _ => {
+    		val latestComment = comments.maxBy(comment => comment.timeStamp)
+    		latestComment.timeStamp
+    	}
+    }
   }
   
   /**
@@ -74,7 +109,8 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
   }
   
   def getLast10Comments() = {
-    comments
+    val sortedComments = comments.sortBy(comment => comment.timeStamp).reverse
+    sortedComments.take(10)
   }
   
   def setLastCheckedNow() = {
@@ -91,7 +127,12 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
   }
 
 
+  def updateLastChecked() {
+    lastChecked = new Date
+  }
+  
   def update() = {
+	 updateLastChecked()
      producer.processComments(this)
   }
   
@@ -104,7 +145,7 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
     
       lastComments.reduceLeft{
         (a: Comment, b: Comment)=> {      
-          frequencies ::= (a.postedAt.getTime - b.postedAt.getTime) / 1000 
+          frequencies ::= (a.timeStamp.getTime - b.timeStamp.getTime) / 1000 
           b;
         }
       }

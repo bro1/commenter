@@ -1,3 +1,5 @@
+package lj.scala.utils
+
 import org.ccil.cowan.tagsoup.jaxp.SAXFactoryImpl
 import _root_.scala.xml.parsing.FactoryAdapter
 import _root_.scala.xml.factory.NodeFactory
@@ -9,7 +11,7 @@ import _root_.org.xml.sax.{XMLReader,InputSource}
 
 
 
-package lj.scala.utils {
+
 class TagSoupFactoryAdapter extends SAXFactoryAdapter
                             with HTMLFactoryAdapter {
   private val parserFactory = new SAXFactoryImpl
@@ -74,7 +76,4 @@ trait SAXFactoryAdapter extends NonBindingFactoryAdapter {
     return rootElem
   }
 
-}
-
-                               
 }

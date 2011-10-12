@@ -9,9 +9,6 @@ import java.util.{Calendar, GregorianCalendar, TimeZone}
 import bro1.commenter._
 
 
-
-
-
 class DelfiCommentTest {
     
     @Test
@@ -31,7 +28,7 @@ class DelfiCommentTest {
 
         assertEquals("to Arnas", (firstComment.postedBy))
         val firstCommentPostedAt = TestUtil.getTimeLT(2009, 8, 13, 11, 36, 00)
-        assertEquals(firstCommentPostedAt.getTime, (firstComment.postedAt))
+        assertEquals(firstCommentPostedAt.getTime, (firstComment.timeStamp))
         assertEquals("24022150", firstComment.remoteCommentID)
 
         val text = firstComment.text        
@@ -46,7 +43,7 @@ class DelfiCommentTest {
         val lastComment = comments{19}
 
         assertEquals("to :)", (lastComment.postedBy))
-        assertEquals(lastCommentPostedAt.getTime, (lastComment.postedAt))
+        assertEquals(lastCommentPostedAt.getTime, (lastComment.timeStamp))
 
     }
        

@@ -132,8 +132,12 @@ object BernardinaiTopicProducer extends TopicProducer {
     
     
     def extractAllComments(doc : Node) : List[Comment] = {
-      val coms = (doc \\ "div").filter(div => (div \ "@class").text.startsWith("sf_comment "))
-      (for {com <- coms} yield getComment(com)).toList       
+      def filter(div : NodeSeq) = {
+        (div \ "@class").text.startsWith("sf_comment ")
+      }
+      
+      val coms = (doc \\ "div").filter(filter)
+      coms.map(getComment).toList
     }
 
     def getComment(node : Node) = {
@@ -205,18 +209,11 @@ object DelfiTopicProducer extends TopicProducer {
     
     def extractAllComments(doc : Node) : List[Comment] = {
        val comments = (doc \\ "div").filter(div => {
-         /*
-    	   println(div)
-    	   print("class: ")
-           print(div \ "@class")
-           println((div \ "@class").text)*/
            (div \ "@class").text.contains("comm-container")
        	})
-       	
-       	println("size " + comments.length)
        
-       (for{com <- comments} yield  extractComment(com)).toList
-    }     
+       comments.map(extractComment).toList
+    }
      
     def extractComment (com : scala.xml.Node) = {
             
@@ -275,7 +272,7 @@ object DelfiTopicProducer extends TopicProducer {
 
    @Override
    def getTitle(url : URL) = {
-     // TODO: implement this
+     // TODO: implement Delfi getArticle
      ""
    }
   

@@ -27,7 +27,7 @@ class CommentPanel(com : Comment) extends GridBagPanel {
   
   val f = new java.text.SimpleDateFormat("yyyy MM dd HH:mm")  
   
-  add(new Label(f.format(com.postedAt)), new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both})
+  add(new Label(f.format(com.timeStamp)), new Constraints{gridx = 1; gridy = 0; fill = GridBagPanel.Fill.Both})
   
   val buttonReply = new Button("R")
   buttonReply.margin = SizeConstants.buttonInsets
@@ -186,10 +186,7 @@ object Actions {
       for ((row, col) <- cells) { 
          
         val topic = Data.getSubscribtions(){row}
-        
-        // TODO:
-        //topic.getTimeOfNextUpdate
-        
+               
         Data.getCommentsForTopic(topic.id)
         
         topic.update
