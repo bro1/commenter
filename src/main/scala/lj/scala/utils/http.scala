@@ -6,7 +6,7 @@ object http {
 
   val httpUtil = new HttpUtil()
   
-  HttpUtil.setDebugMode(true)
+  //HttpUtil.setDebugMode(true)
   
   def download (url : String) = {
     

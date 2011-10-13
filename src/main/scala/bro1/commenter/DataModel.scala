@@ -3,12 +3,64 @@ package bro1.commenter
 import java.net.URI
 import java.sql.DriverManager
 import scala.actors.Actor
+import java.io.File
+import java.util.Date
 
 
-object TopicCache {
+object TopicCacheUpdateActor extends Actor {
+  def act() {    
+    	react {
+    	  case t : Topic => {
+    	    TopicCache.topics ::= t
+    	    //MainApplication.CommentsPanel.revalidate()
+    	    TopicModel.fireTableDataChanged
+    	    act()
+    	    }
+    	  case _ => {
+    	    println("Unknown message")
+    	    act()
+    	  } 
+    	}    
+  }
+}
+
+
+object TopicCache {  
   var topics: List[Topic] = Nil
   var initialized = false  
 }
+
+object FileLocationHelper {
+    val systemProperties = new scala.sys.SystemProperties
+    
+    val prefix = {      
+      val sysPrefix = systemProperties.get("commenter.prefix")            
+      if (sysPrefix.isDefined) {
+        println(sysPrefix.get)
+        sysPrefix.get
+      } else {
+        "."
+      }
+    }
+
+    def get(fileName : String, mustExist : Boolean = true) = {
+	    val fileLocation = prefix + File.separator + fileName
+	    
+	    println(fileLocation)
+	    
+	    val file = new java.io.File(fileLocation)
+	    
+	    if (mustExist && !file.exists()) {	      
+	      val error = "File does not exist: " + file.getCanonicalPath()
+	      println(error)
+	      throw new Exception(error)
+	    }
+	    
+	    file
+    }   
+
+}
+
 
 object Data {
 
@@ -37,32 +89,33 @@ object Data {
     DriverManager.getConnection("jdbc:sqlite:" + f.getCanonicalPath())
   }
 
+  /**
+   * Subscribes to a topic and returns the topic ID
+   */
   def subscribe(name: String, topicType: String, url: String) = {
 
-    val ps = db.prepareStatement("insert into topic(name, topictype, url) values (?, ?, ?)");
+    val ps = db.prepareStatement("insert into topic(name, topictype, url, lastChecked) values (?, ?, ?, 0)");
     var i: Int = 1
     ps.setString(i, name); i += 1
     ps.setString(i, topicType); i += 1
-    ps.setString(i, url); i += 1
+    ps.setString(i, url); i += 1   
 
     val r = ps.executeUpdate
-    var idr = ps.getGeneratedKeys
-
-    if (idr.next) {
-      Option(idr.getInt(1))
-    } else {
-      None
-    }
-
+    
+    
+    
+    val newID = lastID    
+    TopicCacheUpdateActor ! (new Topic(newID, name, topicType, url, new Date(0)))
+    newID
   }
 
   def getSubscribtions() = {
     
     if (!TopicCache.initialized) {
-	    val ps = db.prepareStatement("select id, name, topictype, url from topic")
+	    val ps = db.prepareStatement("select id, name, topictype, url, lastChecked from topic")
 	    val res = ps.executeQuery
 	
-	    var topicSubscriptions: List[Topic] = List()
+	    var topicSubscriptions: List[Topic] = Nil
 	
 	    while (res.next) {
 	
@@ -70,11 +123,15 @@ object Data {
 	      val name = res.getString(2)
 	      val topicType = res.getString(3)
 	      val url = res.getString(4)
+	      val date = new java.util.Date(res.getDate("lastChecked").getTime())
+	      
+	      val commentsFromDB = getCommentsForTopic(id)
+	      
+	      println(commentsFromDB.size)
 	
-	      topicSubscriptions = new Topic(id, name, topicType, url) :: topicSubscriptions
-	
+	      topicSubscriptions ::= new Topic(id, name, topicType, url, lastChecked = date, comments = commentsFromDB) //:: topicSubscriptions	
 	    }
-	
+	    	
 	    TopicCache.topics = topicSubscriptions
 	    TopicCache.initialized = true
     }
@@ -82,16 +139,18 @@ object Data {
     TopicCache.topics
   }
 
-  def getCommentsForTopic(id: Long) = {
+  def getCommentsForTopic(topicID: Long) = {
 
     var comments: List[Comment] = Nil
 
     val ps = db.prepareStatement("""
-            select c.* from comment c 
-            join topic t on t.id = c.topicid
+            select c.* from remotecomment c 
+            join topic t on (t.id = c.topicid)
             where t.id = ?""")
-    ps.setLong(1, id)
+            
+    ps.setLong(1, topicID)
     val rs = ps.executeQuery
+    
     while (rs.next) {
       val time = rs.getDate("time")
       val commentText = rs.getString("comment")
@@ -106,7 +165,7 @@ object Data {
 
   }
 
-  def saveTopic(topic: Topic) = {
+  def updateTopicLastChecked(topic: Topic) = {
     val ps = db.prepareStatement("""update topic set lastchecked = ? where  id = ?""")
 
     val lastChecked = new java.sql.Date(topic.lastChecked.getTime)
@@ -115,6 +174,24 @@ object Data {
     ps.setLong(2, topic.id)
 
     ps.execute
+  }
+  
+  
+  def saveComments(topic : Topic, comments : List[Comment]) {
+    val statement = db.prepareStatement("""insert into remotecomment (topicID, remoteCommentID, author, comment, time) values (?, ?, ?, ?, ?)""")
+    
+	  for (comment <- comments) {
+	      
+		  var i = 1;
+		  statement.setLong(i, topic.id); i += 1
+		  statement.setString(i, comment.remoteCommentID); i += 1 
+		  statement.setString(i, comment.postedBy); i += 1
+		  statement.setString(i, comment.text); i += 1
+		  statement.setDate(i, new java.sql.Date(comment.timeStamp.getTime())); i += 1
+		  
+		  statement.executeUpdate()
+		  comment.id = lastID
+	  }
   }
 
   def insertTopic(topic: Topic) = {

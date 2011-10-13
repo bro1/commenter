@@ -32,9 +32,6 @@ class TopicTimerTest {
       assertEquals(6, topic.getFrequencyInSeconds()) // 5 + 4 + 11 = 20 / 3 = (int) 6
     }
     
-
-    
-    
     @Test
     def testLatestComment() {
       val topic = new Topic(1, "Test Topic Name", "delfi", "http://www.test.com")      
@@ -58,10 +55,7 @@ class TopicTimerTest {
     		  new Comment(2, "b2", getTimeLT(2011, 9, 10, 10, 0, 5).getTime(), "testuser", "comment 2"),
     		  new Comment(3, "b3", getTimeLT(2011, 9, 10, 10, 0, 9).getTime(), "testuser", "comment 3"),
     		  new Comment(4, "b4", getTimeLT(2011, 9, 10, 10, 0, 20).getTime(), "testuser", "comment 4"))
-    		  
-      println(topic.getLatestCommentDate())      
-      println(topic.getFrequencyInSeconds())
-      
+    		        
       assertEquals(getTimeLT(2011, 9, 10, 10, 0, 26).getTime(), topic.getNextUpdate().get) // 5 + 4 + 11 = 20 / 3 = (int) 6
       
       topic.lastChecked = getTimeLT(2011, 9, 10, 10, 0, 40).getTime()

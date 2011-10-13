@@ -26,22 +26,21 @@ object TimeActor extends Actor {
   def act() {
     while (true) {
       schedule
-      Thread.sleep(1000)
+      Thread.sleep(10000)
     }
   }
 
   def schedule {
 
-    val currentTime = new java.util.Date()
-
     def dateFilter(topic: Topic) = {
       val nextUpdate = topic.getNextUpdate()
+      val currentTime = new java.util.Date()
       nextUpdate.isDefined && (currentTime after nextUpdate.get)
     }
 
     val topicsDue = Data.getSubscribtions().filter(dateFilter)
     for (topic <- topicsDue) {
-      topic.lastChecked = currentTime
+      topic.updateLastChecked()
       ArticleCheckActor ! topic
     }
 
@@ -55,20 +54,25 @@ object TimeActor extends Actor {
 object ArticleCheckActor extends Actor {
 
   def act() {
+    
     while (true) {
+      Thread.sleep(1000)
       receive {
         case t: Topic => {
           updateTopic(t)
         }
-      }
-      Thread.sleep(1000)
+        case a => {print("Unknown:"); println(a)}
+      }      
     }
   }
-  
+
   private def updateTopic(t: Topic): Unit = {
     val newComments = t.update();
-    if (!newComments.isEmpty) {
-      
-    }
+    
+    // TODO: update the data grid if it is not empty
+//   if (!newComments.isEmpty) {
+////      Data.saveComments(t, newComments)
+//    }
+
   }
 }

@@ -125,10 +125,11 @@
         <configuration>
           <programs>
             <program>
-              <mainClass>MainApplication</mainClass>
+              <mainClass>bro1.commenter.MainApplication</mainClass>             
               <name>commenter</name>
             </program>
           </programs>
+          <extraJvmArguments>-Dcommenter.prefix=../../..</extraJvmArguments>
           <binFileExtensions>
             <unix>.sh</unix>
           </binFileExtensions>

@@ -60,7 +60,7 @@ object SubscribeToTopicWindow extends Frame {
   }
 
   def subscribe(url: String) {
-    Data.subscribe(url, "", url)
+    Data.subscribe(nameField.text, "bernardinai",  url)   
   }
 
 }

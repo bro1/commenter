@@ -4,8 +4,11 @@ import java.util.Date
 
 
 class Comment (
-  val id : Int,
-  val remoteCommentID : String, val timeStamp : Date, val postedBy  : String , val text : String) {
+  var id : Long,
+  val remoteCommentID : String, 
+  val timeStamp : Date, 
+  val postedBy : String, 
+  val text : String) {
   
   override def toString = {
     "id" + id + "\n" +
@@ -23,8 +26,8 @@ class Comment (
 
     other match {
       case comment : Comment => {
-        if (id != -1) {
-          id == comment.id
+        if (remoteCommentID != -1) {
+          remoteCommentID == comment.remoteCommentID
         } else {
           timeStamp == comment.timeStamp && postedBy == comment.postedBy
         }
@@ -44,21 +47,51 @@ class EditableComment () {
 }
 
 
-class Topic (var id : Long, val title: String, val topicType : String, val url : String) {
+class Topic (
+    var id : Long, 
+    val title: String, 
+    val topicType : String, 
+    val url : String, 
+    var lastChecked : Date = new Date(0), 
+    var comments : List[Comment] = Nil) {
 
+  /**
+   * 
+   * TODO: rework retrieval of produced to be URL based as described in the TopicProducerFactory.getInstance 
+   */
   val producer : TopicProducer = topicType match {
       case "bernardinai" => BernardinaiTopicProducer
-      case "delfi" => DelfiTopicProducer
+      case "delfi" => DelfiTopicProducer      
   }
   
-  var lastChecked : Date = new Date(0);
-  
-  var comments :  List[Comment] = Nil
+  def getNextUpdate() : Option[Date] = {
+    
+    
+    print(id + ":")
+    print(lastChecked)
+    print(":")
+    print(getLatestCommentDate())
+    print(":")
+    val d = getNextUpdateD()
+    print(d)
+    print(":")
+    println(comments.size)
+    
+    
+    d
+        
+    /*
+    val now = lastChecked.getTime() 
+    val a = Some(new Date(now + 30 * 1000))
+    println(a)
+    a 
+    */   
+  }
   
   /**
    * The next update
    */
-  def getNextUpdate() : Option[Date] = {
+  def getNextUpdateD() : Option[Date] = {
     
     val latestCommentDate : Date = getLatestCommentDate()    
     val frequency = getFrequencyInSeconds()
@@ -112,16 +145,7 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
     val sortedComments = comments.sortBy(comment => comment.timeStamp).reverse
     sortedComments.take(10)
   }
-  
-  def setLastCheckedNow() = {
-    lastChecked = new Date();
-    saveToDb()
-  }
-  
-  def saveToDb () = {
-    Data.saveTopic(this)    
-  }
-  
+    
   def insertToDb() = {
     Data.insertTopic(this)
   }
@@ -129,11 +153,12 @@ class Topic (var id : Long, val title: String, val topicType : String, val url :
 
   def updateLastChecked() {
     lastChecked = new Date
+    Data.updateTopicLastChecked(this)
   }
   
   def update() = {
-	 updateLastChecked()
-     producer.processComments(this)
+	 updateLastChecked()	 
+     val newComments = producer.processComments(this)
   }
   
   private def getFrequencyList(): List[Long] = {

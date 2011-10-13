@@ -2,13 +2,15 @@ package bro1.commenter
 
 import swing._
 import event._
+import lj.scala.utils.TimeActor
+import lj.scala.utils.ArticleCheckActor
 
 object SizeConstants {
 
   val labelDimension20 = {
     val label = new Label("a"); 
     val singleSize = label.preferredSize; 
-    new java.awt.Dimension((singleSize.getWidth * 20).toInt, singleSize.getHeight.toInt);     
+    new java.awt.Dimension((singleSize.getWidth * 34).toInt, singleSize.getHeight.toInt);     
   }
     
   val buttonInsets = new java.awt.Insets(2, 2, 2, 2)
@@ -57,7 +59,7 @@ class CommentPanel(com : Comment) extends GridBagPanel {
     case ButtonClicked(`buttonRateGood`) => {
       println("Rate Good")      
     }
-    
+        
     case ButtonClicked(`buttonRateBad`) => {
       println("Rate Bad")      
     }
@@ -66,6 +68,11 @@ class CommentPanel(com : Comment) extends GridBagPanel {
 }
 
 object MainApplication extends SimpleGUIApplication {
+
+  // start the time
+  TimeActor.start
+  ArticleCheckActor.start
+  TopicCacheUpdateActor.start
   
   var currentTopic : Topic = null
 
@@ -118,23 +125,19 @@ object MainApplication extends SimpleGUIApplication {
 
      
     
-    object buttonLoad extends Button ("Load")
-    
+    object buttonLoad extends Button ("Load")   
     object buttonSubscribe extends Button ("Subscribe")
+    object buttonUnsubscribe extends Button ("Unsubscribe")
     
     contents = new GridBagPanel {
-//      layout(new Label("Vardas: ")) = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.NorthWest}
-//      layout(nameField) = new Constraints {gridx = 2; gridy = 0; ; fill = scala.swing.GridBagPanel.Fill.Both}
-//      layout(new Label("Komentaras:")) =  new Constraints {gridx = 1; gridy = 1; anchor = GridBagPanel.Anchor.NorthWest}
-//      layout(fahrenheit) = new Constraints {gridx = 2; gridy = 1; fill = scala.swing.GridBagPanel.Fill.Both}
-      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.East}
-      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0}
+      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.West}
+      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0; anchor = GridBagPanel.Anchor.Center}
+      layout(buttonUnsubscribe)  = new Constraints {gridx = 3; gridy = 0; anchor = GridBagPanel.Anchor.East}
 
       border = Swing.EmptyBorder(5, 5, 5, 5)
-      // was commentsScrollPane
       layout(CommentsScroll) = new Constraints {
           grid = (1, 1);
-          gridwidth = 2;
+          gridwidth = 3;
           fill = scala.swing.GridBagPanel.Fill.Both;
           weightx = 1;
           weighty = 1
@@ -156,18 +159,19 @@ object MainApplication extends SimpleGUIApplication {
     listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
     
     reactions += {   
-//      case EditDone(`nameField`) =>
-//        val c = nameField.text.toInt
-//        val f = c * 9 / 5 + 32
-//        fahrenheit.text = f.toString
         
-      case ButtonClicked(`buttonLoad`) => {
-//        commentsTable.updateSize
+      case ButtonClicked(`buttonLoad`) => {   
+        val t = Data.getSubscribtions(){topicsTable.selection.rows.anchorIndex}
+        ArticleCheckActor ! t
       }
       
       case ButtonClicked(`buttonSubscribe`) => {
         SubscribeToTopicWindow.visible = true
       }
+      
+      case ButtonClicked(`buttonUnsubscribe`) => {
+        Actions.unsubscribe()
+      }      
       
       case TableRowsSelected(`topicsTable`, range, adjusting) => {
         if (!adjusting) {
@@ -180,6 +184,13 @@ object MainApplication extends SimpleGUIApplication {
   
 object Actions {
   
+  def unsubscribe()  {
+    // TODO: delete from BD
+    // TODO: delete from cache
+    // TODO: select another topic
+    // TODO: if required, clean the comments
+  }
+  
   def getTopicSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
         
     if (cells.size == 1) {
@@ -187,9 +198,9 @@ object Actions {
          
         val topic = Data.getSubscribtions(){row}
                
-        Data.getCommentsForTopic(topic.id)
+        //val a = Data.getCommentsForTopic(topic.id)
+        if (topic.comments.isEmpty) topic.update
         
-        topic.update
         currentTopic = topic
         CommentsModel.fireTableDataChanged
 

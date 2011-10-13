@@ -26,24 +26,18 @@ abstract class TopicProducer {
   def getTitle(url : URL) : String
  
   def getReader(url : String) : java.io.Reader = {
-    
-    //val reader : java.io.Reader = null;
-    
+       
     if(url.startsWith("file://")) {
       
-      val fileName = url.substring(7)
-      val file = new File(fileName)     
-      
-      if (!file.exists()) {
-        println("File Not found:" + file.getCanonicalPath())
-      }
-      
+      val fileName = url.substring(7)      
+      val file = FileLocationHelper.get(fileName)           
       new FileReader (file)
 
     } else {
       
       val content = lj.scala.utils.http.download(url)
-      new StringReader (content)      
+      new StringReader (content)
+      
     }
     
   }
@@ -67,15 +61,22 @@ abstract class TopicProducer {
     val doc = new TagSoupFactoryAdapter load getReader(topic.url)
     val allComments = extractAllComments(doc)
        
-    val newComments = (allComments -- topic.comments)     
+    val newComments = (allComments -- topic.comments)
+    
+    // add new comments to topic
     topic.comments ++= newComments
+        
+    // add new comments to the database
+    if (!newComments.isEmpty) {
+       Data.saveComments(topic, newComments)
+    }
+    
     newComments
   } 
 
   def createTopic(id : Long, url : String, doc : Node) : Topic
   
-  def extractAllComments(doc : Node) : List[Comment]
-  
+  def extractAllComments(doc : Node) : List[Comment]  
 }
 
 
