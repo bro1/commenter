@@ -1,6 +1,7 @@
 package bro1.commenter
 
 import java.net.URI
+import java.net.URL
 import java.sql.DriverManager
 import scala.actors.Actor
 
@@ -59,8 +60,14 @@ object SubscribeToTopicWindow extends Frame {
 
   }
 
-  def subscribe(url: String) {
-    Data.subscribe(nameField.text, "bernardinai",  url)   
+  def subscribe(urlString: String) : Boolean = {    
+    val url = new URL(urlString)
+    val topicProducerOption = TopicProducerFactory.getInstance(url)    
+    if (topicProducerOption.isDefined) {
+    	val actualURL  = topicProducerOption.get.matchesPattern(url).get
+    	Data.subscribe(nameField.text, topicProducerOption.get.categoryName,  actualURL.toString())
+    	true
+    } else false
   }
 
 }

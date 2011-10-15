@@ -16,6 +16,11 @@ object TopicCacheUpdateActor extends Actor {
     	    TopicModel.fireTableDataChanged
     	    act()
     	    }
+    	  case ("remove", top) => {
+    	    TopicCache.topics = TopicCache.topics.remove(t => (t == top))
+    	    TopicModel.fireTableDataChanged
+    	    act()
+    	  }
     	  case _ => {
     	    println("Unknown message")
     	    act()
@@ -108,6 +113,22 @@ object Data {
     TopicCacheUpdateActor ! (new Topic(newID, name, topicType, url, new Date(0)))
     newID
   }
+  
+  
+  /**
+   * Unsubscribes from a topic
+   */
+  def unsubscribe(topic: Topic) {
+    deleteComments(topic)
+    deleteTopic(topic)
+    
+    
+        // TODO: delete from cache
+    // TODO: select another topic
+
+    TopicCacheUpdateActor ! ("remove", topic)
+  }
+  
 
   def getSubscribtions() = {
     
@@ -216,5 +237,19 @@ object Data {
     if (id == 0) throw new Exception("cannot read an ID - got 0")
     return id
   }
+  
+  private def deleteComments(topic: Topic) {
+
+    val ps = db.prepareStatement("delete from remotecomment where topicid = ?");    
+    ps.setLong(1, topic.id);     
+    ps.executeUpdate
+  }
+  
+  private def deleteTopic(topic: Topic) {
+    val ps = db.prepareStatement("delete from topic where id = ?")    
+    ps.setLong(1, topic.id)
+    ps.executeUpdate
+  }
+  
   
 }

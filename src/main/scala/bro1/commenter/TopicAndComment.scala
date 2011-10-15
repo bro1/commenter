@@ -54,6 +54,12 @@ class Topic (
     val url : String, 
     var lastChecked : Date = new Date(0), 
     var comments : List[Comment] = Nil) {
+  
+  var newComments = false;
+  
+  def commentsSorted = {
+    comments.sortBy(_.timeStamp).reverse    
+  }
 
   /**
    * 
@@ -177,6 +183,27 @@ class Topic (
     }
     frequencies
   }
+  
+  
+  def markAllCommentsRead() {
+    if (newComments) {
+      newComments = false
+      TopicModel.fireTableDataChanged()
+    } 
+  }
+  
+  def unsubscribe() {
+
+    Data.unsubscribe(this)
+    
+
+    
+
+
+    
+  }  
+  
+
   
 }
 

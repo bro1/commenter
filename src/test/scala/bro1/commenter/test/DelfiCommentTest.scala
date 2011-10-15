@@ -14,7 +14,7 @@ class DelfiCommentTest {
     @Test
     def testExampleTest {
 
-        val reader = DelfiTopicProducer.getReader("file://misc/examples/delfi/str1p1.html")
+        val reader = DelfiTopicProducer.getReader("file://misc/examples/delfi/delfi-20111013.html")
 
         val doc = new TagSoupFactoryAdapter load reader
 
@@ -26,24 +26,32 @@ class DelfiCommentTest {
 
         val firstComment = comments{0}
 
-        assertEquals("to Arnas", (firstComment.postedBy))
-        val firstCommentPostedAt = TestUtil.getTimeLT(2009, 8, 13, 11, 36, 00)
+        assertEquals("Kam nesuprantama - tie ir neprieina prie Šaltinio.", (firstComment.postedBy))
+        val firstCommentPostedAt = TestUtil.getTimeLT(2009, 8, 19, 18, 25, 00)
         assertEquals(firstCommentPostedAt.getTime, (firstComment.timeStamp))
-        assertEquals("24022150", firstComment.remoteCommentID)
+        assertEquals("24128739", firstComment.remoteCommentID)
 
         val text = firstComment.text        
 
-        assertTrue(text.startsWith("godumas,pinigai,noras valdyti"))
-        assertTrue(text.endsWith("ir Hitleriui niekas paminklų nestato..."))
+        println(text)
+        
+        assertTrue(text.startsWith("šią minutę versmė mena"))
+        assertTrue(text.endsWith("poreikių."))
 
         // Also check the last comment
 
-        val lastCommentPostedAt = TestUtil.getTimeLT(2009, 8, 12, 23, 31, 00)
+        val lastCommentPostedAt = TestUtil.getTimeLT(2009, 8, 19, 11, 31, 00)
 
         val lastComment = comments{19}
 
-        assertEquals("to :)", (lastComment.postedBy))
+        assertEquals("""pastebiu:išnaudojamas žmogus sako "gana".""", (lastComment.postedBy))
         assertEquals(lastCommentPostedAt.getTime, (lastComment.timeStamp))
+        
+        
+        val multilineComment = comments{3}
+        val multilineCommentText = multilineComment.text        
+        assertTrue(multilineCommentText.startsWith("Klausimas: "))
+        assertTrue(multilineCommentText.endsWith("Atsakymas: pagal paskirtį.\n\n."))
 
     }
        

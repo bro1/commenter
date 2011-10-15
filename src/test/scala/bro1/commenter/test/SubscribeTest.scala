@@ -16,36 +16,51 @@ class SubscribeTest {
     @Test
     def testBothEmpty {
       
-    	object n extends TextField() 
-    	object u extends TextField()
+    	object nameField extends TextField() 
+    	object urlField extends TextField()
       
-    	TopicHelper.updateName(n, u)
-    	assertEquals("", n.text)
+    	TopicHelper.updateName(nameField, urlField)
+    	assertEquals("", nameField.text)
       
     }
     
     @Test
     def testIsValidURL {
-      object u extends TextField()
-      assertFalse(TopicHelper.isValidURL(u))
+      object urlField extends TextField()
+      assertFalse(TopicHelper.isValidURL(urlField))
       
-      u.text = "htp"
-      assertFalse(TopicHelper.isValidURL(u))
+      urlField.text = "htp"
+      assertFalse(TopicHelper.isValidURL(urlField))
       
-      u.text = "http://sekretore.com"
-      assertTrue(TopicHelper.isValidURL(u))
+      urlField.text = "http://sekretore.com"
+      assertTrue(TopicHelper.isValidURL(urlField))
 
     }
     
     @Test
-    def testAccepts() {
-      assertTrue(BernardinaiTopicProducer.accepts(new URL("http://www.bernardinai.lt/straipsnis/2000-01-01-*/123")))
-      assertTrue(BernardinaiTopicProducer.accepts(new URL("file://www.bernardinai.lt/bernardinai/straipsniai/comments")))
-      assertFalse(BernardinaiTopicProducer.accepts(new URL("file://blah")))
+    def testAcceptsBernardinai() {
+      val url1 = new URL("http://www.bernardinai.lt/straipsnis/2000-01-01-*/123")
+      assertTrue(BernardinaiTopicProducer.accepts(url1))            
+      assertEquals(new URL(url1.toString()+ "/comments"), (BernardinaiTopicProducer.matchesPattern(url1).get))
       
+      val url2 = new URL("file://www.bernardinai.lt/bernardinai/straipsniai/comments")      
+      assertTrue(BernardinaiTopicProducer.accepts(url2))
+      assertFalse(BernardinaiTopicProducer.matchesPattern(url2).isDefined)
       
-      assertTrue(DelfiTopicProducer.accepts(new URL("http://www.delfi.lt/aa")))
-      assertTrue(DelfiTopicProducer.accepts(new URL("https://www.delfi.lt/aa")))
+      assertFalse(BernardinaiTopicProducer.accepts(new URL("file://blah")))      
+    }
+    
+    @Test
+    def testAcceptsDelfi() {
+      val url1 = new URL("http://www.delfi.lt/aa?id=13")          
+      assertTrue(DelfiTopicProducer.accepts(url1))      
+      assertEquals(new URL(url1 + "&com=1"), DelfiTopicProducer.matchesPattern(url1).get)
+      
+      val url2 = new URL("http://www.delfi.lt/aa?id=13&com=123")          
+      assertTrue(DelfiTopicProducer.accepts(url2))      
+      assertEquals(new URL("http://www.delfi.lt/aa?id=13&com=1"), DelfiTopicProducer.matchesPattern(url2).get)
+      
+      assertFalse(DelfiTopicProducer.accepts(new URL("https://www.delfi.lt/aa")))
       assertFalse(DelfiTopicProducer.accepts(new URL("https://www.delfis.lt/aa")))
     }
     
@@ -54,21 +69,28 @@ class SubscribeTest {
       assertEquals("Rima Malickaitė. Didžiausias poreikis – įgyti racionalų tikėjimo pamatą", 
          BernardinaiTopicProducer.getTitle(new URL("file://misc/examples/bernardinai/bernardinai-20110929.html")))
     }
+    
+    @Test
+    def testGetDelfiTitle() {
+      assertEquals("Sekmadienio Evangelija. Krikščionybės kilmės vieta", 
+         DelfiTopicProducer.getTitle(new URL("file://misc/examples/delfi/delfi-20111013.html")))
+    }
+    
 
     @Test
     def testBernardinaiURLPatternMatch() {
       val a = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/70152")
-      assertTrue(BernardinaiTopicProducer.matchesPattern(a))
+      assertTrue(BernardinaiTopicProducer.matchesPattern(a).isDefined)
       
       
       val b = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/70152/comments")
-      assertTrue(BernardinaiTopicProducer.matchesPattern(b))
+      assertTrue(BernardinaiTopicProducer.matchesPattern(b).isDefined)
       
       val c = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/abc/comments")
-      assertFalse(BernardinaiTopicProducer.matchesPattern(c))
+      assertFalse(BernardinaiTopicProducer.matchesPattern(c).isDefined)
       
       val d = new URL("http://www.bernardinai.lt/straipsnis/2011-10-09-rinkeju-apklausa-lenkijoje-rinkimus-laimejo-premjero-d-tusko-pilietine-platforma/123/commentsabc")
-      assertFalse(BernardinaiTopicProducer.matchesPattern(d))
+      assertFalse(BernardinaiTopicProducer.matchesPattern(d).isDefined)
     }
     
 

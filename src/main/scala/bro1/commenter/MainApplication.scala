@@ -4,6 +4,9 @@ import swing._
 import event._
 import lj.scala.utils.TimeActor
 import lj.scala.utils.ArticleCheckActor
+import java.awt.Font
+import java.awt.Dimension
+//import javax.swing.
 
 object SizeConstants {
 
@@ -86,6 +89,35 @@ object MainApplication extends SimpleGUIApplication {
       peer.removeAll
     }
   }
+  
+  object NewCommentPanel extends GridBagPanel {
+
+    object NameLabel extends Label {
+      text = "Vardas:"
+    }
+    
+    object NameField extends TextField {
+      columns = 20
+    }
+    
+    object Blah extends ScrollPane {
+      contents = CommentField
+      minimumSize = new Dimension(100,100)
+    }
+    
+    object CommentField extends TextArea { 
+	  lineWrap = true
+      wordWrap = true
+      rows = 5
+       
+    }
+
+    add(NameLabel, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 0; gridy = 0; weightx = 0.5; weighty=1})
+    add(NameField, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 1; gridy = 0; weightx = 1})
+    add(Blah, new Constraints{fill = GridBagPanel.Fill.Both; gridy = 2; gridwidth = 2; weighty = 5})
+
+  }
+  
 
   object CommentsScroll extends ScrollPane {
 
@@ -102,15 +134,27 @@ object MainApplication extends SimpleGUIApplication {
   }
 
 
+    object topicsTable extends Table() {
+        model = TopicModel
+        rowHeight = 15
+
+        
+        override def rendererComponent (isSelected: Boolean, focused: Boolean, row: Int, column: Int): Component = {
+          
+        		val component = super.rendererComponent(isSelected, focused, row, column)
+        		        		
+        		if (Data.getSubscribtions(){row}.newComments) {        		  
+        		  component.font = new Font(component.font.getName(), component.font.getStyle() + Font.BOLD, component.font.getSize())        		  
+        		}
+        		
+        		component
+        }
+    }
   
   
   def top = new MainFrame {
     title = "Komentatorius"
     
-    object topicsTable extends Table() {
-        model = TopicModel
-        rowHeight = 15         
-    }
     
     object nameField extends TextField { columns = 20 }
     object fahrenheit extends TextArea { rows = 6; columns = 20; border = Swing.LineBorder(java.awt.Color.BLACK)}
@@ -147,16 +191,22 @@ object MainApplication extends SimpleGUIApplication {
 
       layout(topicsScrollPane) = new Constraints {
           grid = (0, 0);
-          gridheight = 2;
+          gridheight = 3;
           fill = GridBagPanel.Fill.Both;
           weightx=0.5
           weighty = 0.5
+      }
+      
+      layout(NewCommentPanel) = new Constraints {
+        grid = (1,2)
+        gridwidth = 3
+        fill = GridBagPanel.Fill.Horizontal        
       }
 
 
     }        
     
-    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, topicsTable.selection)
+    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, buttonUnsubscribe, topicsTable.selection)
     
     reactions += {   
         
@@ -185,10 +235,10 @@ object MainApplication extends SimpleGUIApplication {
 object Actions {
   
   def unsubscribe()  {
-    // TODO: delete from BD
-    // TODO: delete from cache
-    // TODO: select another topic
-    // TODO: if required, clean the comments
+	  if (MainApplication.currentTopic != null) {
+	    currentTopic.unsubscribe()	    
+	    currentTopic = null
+	  }
   }
   
   def getTopicSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
@@ -197,19 +247,20 @@ object Actions {
       for ((row, col) <- cells) { 
          
         val topic = Data.getSubscribtions(){row}
-               
-        //val a = Data.getCommentsForTopic(topic.id)
+                       
         if (topic.comments.isEmpty) topic.update
         
         currentTopic = topic
-        CommentsModel.fireTableDataChanged
+        topic.markAllCommentsRead()
+        CommentsModel.fireTableCellUpdated(row, col)
 
         CommentsPanel.clear()
 
-        for (c <- currentTopic.comments) {
+        for (c <- currentTopic.commentsSorted) {
             CommentsPanel.a(new CommentPanel(c))            
         }
 
+        CommentsScroll.verticalScrollBar.value = 0
         CommentsScroll.revalidate        
       }
     }
@@ -219,7 +270,7 @@ object Actions {
 object CommentsModel extends javax.swing.table.DefaultTableModel {
 
     override def getValueAt(row : Int, col : Int) = { 
-      currentTopic.comments{row}.text 
+      currentTopic.comments.sortBy(_.timeStamp).reverse{row}.text 
     }
       
     override def getColumnCount() = { 1 }

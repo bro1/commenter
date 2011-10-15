@@ -16,12 +16,14 @@ object TopicProducerFactory {
   
   def getInstance(url : URL) = {
     producers.find(_.accepts(url))    
-  }
+  }    
 }
 
 abstract class TopicProducer {
   
   def accepts(url : URL) : Boolean
+  
+  def matchesPattern(url : URL) : Option[URL] 
   
   def getTitle(url : URL) : String
  
@@ -67,8 +69,14 @@ abstract class TopicProducer {
     topic.comments ++= newComments
         
     // add new comments to the database
-    if (!newComments.isEmpty) {
+    if (!newComments.isEmpty) {      
        Data.saveComments(topic, newComments)
+       topic.newComments = true
+       
+       //val s = MainApplication.topicsTable.selection       
+       TopicModel.fireTableDataChanged
+       //MainApplication.topicsTable.selection.cells.add(s.cells.first)
+       
     }
     
     newComments
@@ -76,7 +84,9 @@ abstract class TopicProducer {
 
   def createTopic(id : Long, url : String, doc : Node) : Topic
   
-  def extractAllComments(doc : Node) : List[Comment]  
+  def extractAllComments(doc : Node) : List[Comment]
+  
+  def categoryName: String ;
 }
 
 
@@ -88,18 +98,18 @@ object BernardinaiTopicProducer extends TopicProducer {
         bernardinaiComments 
     }
     
-    @Override
+
     def accepts(url : URL) = {     
-      (url.getProtocol() == "file" && url.toString.contains("bernardinai")) ||  matchesPattern(url)        
+      (url.getProtocol() == "file" && url.toString.contains("bernardinai")) ||  matchesPattern(url).isDefined        
     }
     
-    def matchesPattern(url : URL) : Boolean = {
+    def matchesPattern(url : URL) : Option[URL] = {
       
-      val urlPattern = """http://www\.bernardinai\.lt/straipsnis/\d{4}-\d{2}-\d{2}-.*/(\d+)(/comments)?""".r
+      val urlPattern = """(http://www\.bernardinai\.lt/straipsnis/\d{4}-\d{2}-\d{2}-.*/(\d+))(/comments([#].*)?)?""".r
       
       url.toString() match { 
-        case urlPattern(c, d) => true
-        case _ => false
+        case urlPattern(mainURL, articleID, comments, anchor) => Some(new URL(mainURL + "/comments"))
+        case _ => None
       }       
     }
     
@@ -191,7 +201,9 @@ object BernardinaiTopicProducer extends TopicProducer {
     }
    
    def urls(doc : Node)  = 
-      (doc \\ "a").filter(_.attribute("class").mkString == "comNav") 
+      (doc \\ "a").filter(_.attribute("class").mkString == "comNav")
+         
+   def categoryName : String = "bernardinai"
   
 }
 
@@ -210,7 +222,7 @@ object DelfiTopicProducer extends TopicProducer {
     
     def extractAllComments(doc : Node) : List[Comment] = {
        val comments = (doc \\ "div").filter(div => {
-           (div \ "@class").text.contains("comm-container")
+           (div \ "@class").text == "comm-container" && div.attribute("id").isDefined
        	})
        
        comments.map(extractComment).toList
@@ -265,17 +277,42 @@ object DelfiTopicProducer extends TopicProducer {
    def getFrom(com : scala.xml.Node) = {
       ((com \ "div").filter(_.attribute("class").mkString == "comm-name") \ "strong").text
    }
+//    def accepts(url : URL) = {
+//      url.getHost() == "www.delfi.lt"
+//    }
    
-   @Override
-    def accepts(url : URL) = {
-      url.getHost() == "www.delfi.lt"
+   
+    def accepts(url : URL) = {     
+      (url.getProtocol() == "file" && url.toString.contains("delfi")) ||  matchesPattern(url).isDefined        
     }
+    
+    def matchesPattern(url : URL) : Option[URL] = {
+      
+      val urlPattern = """(http://(\w+)\.delfi\.lt/.*?id=(\d+))(&.*)?""".r
+      
+      url.toString() match { 
+        case urlPattern(mainURL, domain3rdLevel, id, params) => Some(new URL(mainURL + "&com=1"))
+        case _ => None
+      }       
+    }
+   
 
    @Override
    def getTitle(url : URL) = {
-     // TODO: implement Delfi getArticle
-     ""
+    	val doc = new TagSoupFactoryAdapter load getReader(url.toString())
+    	
+    	val titleElement = (doc \\ "title").text.trim()
+    	
+    	val  toDrop = " - DELFI Žinios"
+    	
+    	if (titleElement.endsWith(toDrop)) {
+    		titleElement.dropRight(toDrop.length())
+    	} else {
+    	  titleElement
+    	}
    }
+   
+   def categoryName : String = "delfi"   
   
 }
 
