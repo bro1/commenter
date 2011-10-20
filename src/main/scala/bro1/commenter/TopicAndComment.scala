@@ -1,6 +1,7 @@
 package bro1.commenter
 
 import java.util.Date
+import bro1.commenter.impl.delfi.DelfiTopicProducer
 
 
 class Comment (
@@ -8,7 +9,8 @@ class Comment (
   val remoteCommentID : String, 
   val timeStamp : Date, 
   val postedBy : String, 
-  val text : String) {
+  val text : String,
+  val email : String = null) {
   
   override def toString = {
     "id" + id + "\n" +

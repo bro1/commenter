@@ -6,7 +6,7 @@ import lj.scala.utils.TimeActor
 import lj.scala.utils.ArticleCheckActor
 import java.awt.Font
 import java.awt.Dimension
-//import javax.swing.
+
 
 object SizeConstants {
 
@@ -70,7 +70,7 @@ class CommentPanel(com : Comment) extends GridBagPanel {
 
 }
 
-object MainApplication extends SimpleGUIApplication {
+object MainApplication extends SimpleSwingApplication {
 
   // start the time
   TimeActor.start
@@ -100,7 +100,17 @@ object MainApplication extends SimpleGUIApplication {
       columns = 20
     }
     
-    object Blah extends ScrollPane {
+    object EmailLabel extends Label {
+      text = "El. paštas:"
+    }
+    
+    object EmailField extends TextField {
+      columns = 20
+    }
+    
+    
+    
+    object CommentScrollPane extends ScrollPane {
       contents = CommentField
       minimumSize = new Dimension(100,100)
     }
@@ -114,8 +124,9 @@ object MainApplication extends SimpleGUIApplication {
 
     add(NameLabel, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 0; gridy = 0; weightx = 0.5; weighty=1})
     add(NameField, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 1; gridy = 0; weightx = 1})
-    add(Blah, new Constraints{fill = GridBagPanel.Fill.Both; gridy = 2; gridwidth = 2; weighty = 5})
-
+    add(EmailLabel, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 0; gridy = 1; weightx = 0.5; weighty=1})
+    add(EmailField, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 1; gridy = 1; weightx = 1})    
+    add(CommentScrollPane, new Constraints{fill = GridBagPanel.Fill.Both; gridy = 2; gridwidth = 2; weighty = 5})
   }
   
 
@@ -169,21 +180,21 @@ object MainApplication extends SimpleGUIApplication {
 
      
     
-    object buttonLoad extends Button ("Load")   
+    object buttonLoad extends Button ("Load") 
     object buttonSubscribe extends Button ("Subscribe")
     object buttonUnsubscribe extends Button ("Unsubscribe")
     
     contents = new GridBagPanel {
-      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; anchor = GridBagPanel.Anchor.West}
-      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0; anchor = GridBagPanel.Anchor.Center}
-      layout(buttonUnsubscribe)  = new Constraints {gridx = 3; gridy = 0; anchor = GridBagPanel.Anchor.East}
+      layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
+      layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
+      layout(buttonUnsubscribe)  = new Constraints {gridx = 3; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
 
       border = Swing.EmptyBorder(5, 5, 5, 5)
       layout(CommentsScroll) = new Constraints {
           grid = (1, 1);
           gridwidth = 3;
-          fill = scala.swing.GridBagPanel.Fill.Both;
-          weightx = 1;
+          fill = scala.swing.GridBagPanel.Fill.Both
+          weightx = 1
           weighty = 1
       }
       
@@ -193,7 +204,7 @@ object MainApplication extends SimpleGUIApplication {
           grid = (0, 0);
           gridheight = 3;
           fill = GridBagPanel.Fill.Both;
-          weightx=0.5
+          weightx = 0.5
           weighty = 0.5
       }
       
@@ -260,7 +271,7 @@ object Actions {
             CommentsPanel.a(new CommentPanel(c))            
         }
 
-        CommentsScroll.verticalScrollBar.value = 0
+        CommentsScroll.verticalScrollBar.value = 1
         CommentsScroll.revalidate        
       }
     }
@@ -299,6 +310,7 @@ object TopicModel extends javax.swing.table.AbstractTableModel {
         Data.getSubscribtions().size
     }
    
-    override def getColumnName(col : Int) = { "Topic" } }
+    override def getColumnName(col : Int) = { "Topic" } 
+}
 
 

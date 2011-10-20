@@ -7,6 +7,7 @@ import org.junit.Test
 import org.junit.Assert._
 import java.util.{Calendar, GregorianCalendar, TimeZone}
 import bro1.commenter._
+import bro1.commenter.impl.delfi.DelfiTopicProducer
 
 
 class DelfiCommentTest {
@@ -25,6 +26,7 @@ class DelfiCommentTest {
         assertEquals("Number of comments does not match", 20, comments.size)
 
         val firstComment = comments{0}
+        
 
         assertEquals("Kam nesuprantama - tie ir neprieina prie Šaltinio.", (firstComment.postedBy))
         val firstCommentPostedAt = TestUtil.getTimeLT(2009, 8, 19, 18, 25, 00)

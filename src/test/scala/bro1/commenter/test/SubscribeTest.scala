@@ -9,7 +9,7 @@ import java.util.{Calendar, GregorianCalendar, TimeZone}
 import bro1.commenter._
 import scala.swing.TextField
 import java.net.URL
-
+import bro1.commenter.impl.delfi.DelfiTopicProducer
 
 class SubscribeTest {
     
