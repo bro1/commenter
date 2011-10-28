@@ -3,50 +3,7 @@ package bro1.commenter
 import java.util.Date
 import bro1.commenter.impl.delfi.DelfiTopicProducer
 
-
-class Comment (
-  var id : Long,
-  val remoteCommentID : String, 
-  val timeStamp : Date, 
-  val postedBy : String, 
-  val text : String,
-  val email : String = null) {
-  
-  override def toString = {
-    "id" + id + "\n" +
-    "Comment ID: " + remoteCommentID + "\n" +
-    "Posted at: " +  timeStamp + "\n" +
-    "Author:" + postedBy + "\n" +
-    text
-  }
-
-  /** 
-   * Equality is checked based on ID and then if ID is -1 we check 
-   * the comment's time and author. 
-   */
-  override def equals(other : Any) = {
-
-    other match {
-      case comment : Comment => {
-        if (remoteCommentID != -1) {
-          remoteCommentID == comment.remoteCommentID
-        } else {
-          timeStamp == comment.timeStamp && postedBy == comment.postedBy
-        }
-      }  
-      case _ => false
-    } 
-    
-  }
-    
-}
-
-
-class EditableComment () {
-  var postedBy : String = null
-  var text : String = null
- 
-}
+import java.net.URL
 
 
 class Topic (
@@ -57,10 +14,12 @@ class Topic (
     var lastChecked : Date = new Date(0), 
     var comments : List[Comment] = Nil) {
   
-  var newComments = false;
+  var newComments = false
+  
+  def getURL =  new URL(url)
   
   def commentsSorted = {
-    comments.sortBy(_.timeStamp).reverse    
+    comments.sortBy(_.timeStamp)    
   }
 
   /**
@@ -76,15 +35,15 @@ class Topic (
     
     
     print(id + ":")
-    print(lastChecked)
-    print(":")
-    print(getLatestCommentDate())
-    print(":")
+    //print(lastChecked)
+    //print(":")
+    //print(getLatestCommentDate())
+    //print(":")
     val d = getNextUpdateD()
     print(d)
     print(":")
-    println(comments.size)
-    
+    println(title)
+    //print(comments.size)    
     
     d
         
@@ -106,7 +65,7 @@ class Topic (
 
     if (latestCommentDate.equals(new Date(0))) {
        if (lastChecked.equals(new Date(0))) {
-         Some(new Date())
+         Some(new Date(new Date().getTime() - 1000))
        } else {
          Some(new Date(lastChecked.getTime() + 20l * 60 * 1000))  
        }
@@ -194,21 +153,16 @@ class Topic (
     } 
   }
   
+  
   def unsubscribe() {
-
-    Data.unsubscribe(this)
-    
-
-    
-
-
-    
+    Data.unsubscribe(this)        
   }  
   
 
   
 }
 
+// TODO: do we really need classes BernardinaiTopic and DelfiTopic?  
 class BernardinaiTopic(id:Long, title: String, url : String) 
   extends Topic (id, title, "bernardinai", url)   
 

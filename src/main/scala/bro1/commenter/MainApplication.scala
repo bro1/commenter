@@ -3,9 +3,15 @@ package bro1.commenter
 import swing._
 import event._
 import lj.scala.utils.TimeActor
-import lj.scala.utils.ArticleCheckActor
+import lj.scala.utils.WebAccessActor
 import java.awt.Font
 import java.awt.Dimension
+import java.awt.Desktop
+import scala.actors.Actor.actor
+import scala.actors.Actor.receive
+import scala.actors.Actor.self
+import scala.actors.Actor
+
 
 
 object SizeConstants {
@@ -74,35 +80,46 @@ object MainApplication extends SimpleSwingApplication {
 
   // start the time
   TimeActor.start
-  ArticleCheckActor.start
+  WebAccessActor.start
   TopicCacheUpdateActor.start
   
+  // TODO: load all comments in background
+  BlahActor.start
+  ScrollToEndActor.start()
+  
   var currentTopic : Topic = null
+  
 
-  object CommentsPanel extends GridBagPanel {
+  class CommentsPanel extends BoxPanel(Orientation.Vertical) {
     
     def a(c : Component) = {
-        add(c, new Constraints{fill = GridBagPanel.Fill.Both; gridy = contents.size})
+      contents += c
     }
-
-    def clear() = {
-      peer.removeAll
-    }
+    
   }
+
+/*  
+  object CommentsPanel extends BoxPanel(Orientation.Vertical) {
+    
+    def a(c : Component) = {
+      contents += c
+    }
+    
+  }
+  */
+  
   
   object NewCommentPanel extends GridBagPanel {
 
-    object NameLabel extends Label {
-      text = "Vardas:"
-    }
+    object PostButton extends Button("Skelbti")
+    
+    object NameLabel extends Label("Vardas:")    
     
     object NameField extends TextField {
       columns = 20
     }
     
-    object EmailLabel extends Label {
-      text = "El. paštas:"
-    }
+    object EmailLabel extends Label ("El. paštas:")    
     
     object EmailField extends TextField {
       columns = 20
@@ -127,6 +144,20 @@ object MainApplication extends SimpleSwingApplication {
     add(EmailLabel, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 0; gridy = 1; weightx = 0.5; weighty=1})
     add(EmailField, new Constraints{fill = GridBagPanel.Fill.Both; gridx = 1; gridy = 1; weightx = 1})    
     add(CommentScrollPane, new Constraints{fill = GridBagPanel.Fill.Both; gridy = 2; gridwidth = 2; weighty = 5})
+    add(PostButton, new Constraints{fill = GridBagPanel.Fill.None; gridy = 3; gridwidth = 2; weighty = 1})
+    
+    listenTo(PostButton)    
+    
+    reactions += {
+	    case ButtonClicked(`PostButton`) => {
+	      println("Post")      
+	      
+	      val c = new Comment(postedBy = NameField.text, email = EmailField.text, text = CommentField.text)	      
+	      WebAccessActor ! new lj.scala.utils.Post(MainApplication.currentTopic, c)	      
+	    }
+  	}
+
+    
   }
   
 
@@ -139,7 +170,7 @@ object MainApplication extends SimpleSwingApplication {
     peer.getVerticalScrollBar.setUnitIncrement(20)
 
     contents = {
-        CommentsPanel
+        new CommentsPanel()
     }
   
   }
@@ -171,10 +202,7 @@ object MainApplication extends SimpleSwingApplication {
     object fahrenheit extends TextArea { rows = 6; columns = 20; border = Swing.LineBorder(java.awt.Color.BLACK)}
 
     object topicsScrollPane extends ScrollPane {      
-        contents = {
-            topicsTable
-        }
-
+        contents = topicsTable
         preferredSize = new java.awt.Dimension(250, 400)       
     }
 
@@ -183,11 +211,23 @@ object MainApplication extends SimpleSwingApplication {
     object buttonLoad extends Button ("Load") 
     object buttonSubscribe extends Button ("Subscribe")
     object buttonUnsubscribe extends Button ("Unsubscribe")
+    object buttonOpen extends Button ("Open")
+    object buttonPanel extends FlowPanel {
+       contents ++= buttonLoad :: 
+    	   			buttonSubscribe::
+    	   			buttonUnsubscribe :: 
+    	   			buttonOpen :: 
+    	   			Nil
+    }
     
     contents = new GridBagPanel {
+      /*
       layout(buttonLoad)  = new Constraints {gridx = 1; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
       layout(buttonSubscribe)  = new Constraints {gridx = 2; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
       layout(buttonUnsubscribe)  = new Constraints {gridx = 3; gridy = 0; weightx = 0.33; fill = GridBagPanel.Fill.Horizontal}
+      */
+      layout(buttonPanel) =  new Constraints {gridx = 1; gridy = 0; weightx = 1; fill = GridBagPanel.Fill.Horizontal}
+      
 
       border = Swing.EmptyBorder(5, 5, 5, 5)
       layout(CommentsScroll) = new Constraints {
@@ -217,13 +257,13 @@ object MainApplication extends SimpleSwingApplication {
 
     }        
     
-    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, buttonUnsubscribe, topicsTable.selection)
+    listenTo(nameField, fahrenheit, buttonLoad, buttonSubscribe, buttonUnsubscribe, topicsTable.selection, buttonOpen)
     
     reactions += {   
-        
+      
       case ButtonClicked(`buttonLoad`) => {   
-        val t = Data.getSubscribtions(){topicsTable.selection.rows.anchorIndex}
-        ArticleCheckActor ! t
+        val topic = Data.getSubscribtions(){topicsTable.selection.rows.anchorIndex}
+        WebAccessActor ! topic
       }
       
       case ButtonClicked(`buttonSubscribe`) => {
@@ -231,14 +271,22 @@ object MainApplication extends SimpleSwingApplication {
       }
       
       case ButtonClicked(`buttonUnsubscribe`) => {
-        Actions.unsubscribe()
+        Actions.unsubscribe() 
       }      
+
+      case ButtonClicked(`buttonOpen`) => {
+    	   Desktop.getDesktop().browse(MainApplication.currentTopic.getURL.toURI())
+
+      }      
+      
       
       case TableRowsSelected(`topicsTable`, range, adjusting) => {
         if (!adjusting) {
           Actions.getTopicSelection(topicsTable.selection.cells)
         }
       }
+      
+      
     }     
   }
   
@@ -264,19 +312,72 @@ object Actions {
         currentTopic = topic
         topic.markAllCommentsRead()
         CommentsModel.fireTableCellUpdated(row, col)
+               
+        val commentsPane = new CommentsPanel()        
 
-        CommentsPanel.clear()
-
-        for (c <- currentTopic.commentsSorted) {
-            CommentsPanel.a(new CommentPanel(c))            
+        val start = System.currentTimeMillis()
+        
+        for (c <- currentTopic.commentsSorted.takeRight(10)) {                    
+	          commentsPane.a(new CommentPanel(c))
         }
+        
+        println("Time to display topic (ms): " + (System.currentTimeMillis() - start))
+        
+        CommentsScroll.contents = commentsPane
+        
 
-        CommentsScroll.verticalScrollBar.value = 1
-        CommentsScroll.revalidate        
+        BlahActor ! "do"
+        
+        
+        
+        ScrollToEndActor ! "end"
+        
       }
     }
   }
-}  
+}
+
+  object ScrollToEndActor extends Actor {
+    def act {
+      loop {
+        Thread.sleep(50);
+        receive {
+          case "end" => {
+            CommentsScroll.verticalScrollBar.value = CommentsScroll.verticalScrollBar.maximum
+          }
+        }
+      }
+    }
+  } 
+
+object BlahActor extends Actor {
+  
+  def act {
+    
+    loop {
+    
+      receive {
+        
+        case _ => {
+                      
+	        val commentsPaneAll = new CommentsPanel()        
+	
+	        val start1 = System.currentTimeMillis()
+	        
+	        for (c <- currentTopic.commentsSorted) {                    
+		          commentsPaneAll.a(new CommentPanel(c))
+	        }
+	        
+	        //CommentsScroll.contents = commentsPaneAll
+	        
+	        println("Time to add all comments in topic (ms): " + (System.currentTimeMillis() - start1))
+        }
+      }
+    }
+  }
+
+}
+
   
 object CommentsModel extends javax.swing.table.DefaultTableModel {
 
@@ -312,5 +413,7 @@ object TopicModel extends javax.swing.table.AbstractTableModel {
    
     override def getColumnName(col : Int) = { "Topic" } 
 }
+
+
 
 

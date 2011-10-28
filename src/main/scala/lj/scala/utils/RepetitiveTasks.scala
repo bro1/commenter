@@ -41,7 +41,7 @@ object TimeActor extends Actor {
     val topicsDue = Data.getSubscribtions().filter(dateFilter)
     for (topic <- topicsDue) {
       topic.updateLastChecked()
-      ArticleCheckActor ! topic
+      WebAccessActor ! topic
     }
 
   }
@@ -51,18 +51,23 @@ object TimeActor extends Actor {
 /**
  * TODO: implement ArticleCheckActor 
  */
-object ArticleCheckActor extends Actor {
+object WebAccessActor extends Actor {
 
   def act() {
     
-    while (true) {
-      Thread.sleep(1000)
+    loop {
+      // We do not really need to sleep - just process a message if it's available
+      //Thread.sleep(1000)
       receive {
         case t: Topic => {
           updateTopic(t)
-        }
+        } 
+        case post : Post => {
+          "Post message received"
+          postCommentToTopic(post)
+        } 
         case a => {print("Unknown:"); println(a)}
-      }      
+      }
     }
   }
 
@@ -75,4 +80,17 @@ object ArticleCheckActor extends Actor {
 //    }
 
   }
+  
+  
+  
+  private def postCommentToTopic(post : Post) {    
+    val topicProducer = TopicProducerFactory.getInstance(post.topic.getURL)
+    val poster = topicProducer.get.getPoster()    
+    poster.post(post.topic, post.comment)
+    updateTopic(post.topic)
+  }
+  
 }
+
+
+class Post(val topic:Topic, val comment:Comment) {}

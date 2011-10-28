@@ -1,4 +1,4 @@
-package bro1.commenter.impl.delfi
+package bro1.commenter.impl.bernardinai
 
 import org.apache.http._
 import org.apache.http.client.methods.HttpPost
@@ -16,12 +16,27 @@ import org.apache.http.client.protocol.ClientContext
 import org.apache.http.impl.cookie.BasicClientCookie
 import org.apache.http.util.EntityUtils
 import bro1.commenter.{Poster, Comment, Topic}
+import java.io.FileInputStream
 
 
+import java.io.File
+import java.io.FileInputStream
 
-object DelfiPoster extends Poster {
 
-  def delfiPost(url: String, name : String, email : String, commentText : String) {
+object BernardinaiPoster extends Poster {
+
+  
+  protected def properties = {
+    val p = new java.util.Properties()
+    
+    val userHome = System.getProperties().getProperty("user.home")
+    val f = new File(userHome + File.separator + ".commenter")
+    val fis = new FileInputStream(f)
+    p.load(fis)
+    (p.getProperty("bernardinai.username"), p.getProperty("bernardinai.password"))
+  }
+  
+  protected def bernardinaiPost(url: String, name : String, email : String, commentText : String) {
 
     val client: HttpClient = new DefaultHttpClient()
     client.getParams().setParameter(
@@ -31,7 +46,10 @@ object DelfiPoster extends Poster {
 
     client.getParams().setParameter(ClientContext.COOKIE_STORE, cookieStore)
 
-    val httpget = new HttpGet("http://t.delfi.lt/_d")
+    // TODO: do not commit
+    val (a, b) = properties
+    
+    val httppostLogin = getLogin(a, b)
 
     val httppost = new HttpPost(url)
 
@@ -47,11 +65,12 @@ object DelfiPoster extends Poster {
     val formFieldsList = JavaConversions.asList(formFields)
 
     val entity = new UrlEncodedFormEntity(formFieldsList, "UTF-8")
-    println(entity)
+
 
     httppost.setEntity(entity)
     httppost.setHeader("Referer", url)
-    val resultForCookie = client.execute(httpget)
+    
+    val resultForCookie = client.execute(httppostLogin)
 
 
     resultForCookie.getEntity().consumeContent()
@@ -62,6 +81,27 @@ object DelfiPoster extends Poster {
   }
 
   def post(t: Topic, c: Comment) {
-	  delfiPost(t.url, c.postedBy, c.email, c.text)
+	  bernardinaiPost(t.url, c.postedBy, c.email, c.text)
+  }
+  
+  
+  private def getLogin(user : String, pass : String): org.apache.http.client.methods.HttpPost = {
+    
+    val formFields: List[NameValuePair] =
+      
+        new BasicNameValuePair("signin[username]", user) ::
+        new BasicNameValuePair("signin[password]", pass) ::
+        new BasicNameValuePair("signin[remember]", "on") ::
+        Nil
+
+    val formFieldsList = JavaConversions.asList(formFields)
+
+    	val entity = new UrlEncodedFormEntity(formFieldsList, "UTF-8")
+    
+    val httpPost = new HttpPost("http://www.bernardinai.lt/login")   
+
+    httpPost.setEntity(entity)
+    
+    httpPost
   }
 }
