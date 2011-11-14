@@ -84,8 +84,8 @@ object MainApplication extends SimpleSwingApplication {
   TopicCacheUpdateActor.start
   
   // TODO: load all comments in background
-  BlahActor.start
-  ScrollToEndActor.start()
+  BuildCommentsUIActor.start
+  ScrollToEndActor.start
   
   var currentTopic : Topic = null
   
@@ -97,16 +97,6 @@ object MainApplication extends SimpleSwingApplication {
     }
     
   }
-
-/*  
-  object CommentsPanel extends BoxPanel(Orientation.Vertical) {
-    
-    def a(c : Component) = {
-      contents += c
-    }
-    
-  }
-  */
   
   
   object NewCommentPanel extends GridBagPanel {
@@ -299,6 +289,28 @@ object Actions {
 	    currentTopic = null
 	  }
   }
+
+    def updateCommentsUI {
+
+      val commentsPane = new CommentsPanel()
+
+      val start = System.currentTimeMillis()
+
+      if (currentTopic.uiCache == null) {
+
+        for (c <- currentTopic.commentsSorted.takeRight(10)) {
+          commentsPane.a(new CommentPanel(c))
+        }
+
+        println("Time to display topic (ms): " + (System.currentTimeMillis() - start))
+
+        CommentsScroll.contents = commentsPane
+        BuildCommentsUIActor ! currentTopic
+      } else {
+        CommentsScroll.contents = currentTopic.uiCache
+      }
+
+    }
   
   def getTopicSelection(cells: scala.collection.mutable.Set[(Int, Int)]) = {
         
@@ -313,20 +325,8 @@ object Actions {
         topic.markAllCommentsRead()
         CommentsModel.fireTableCellUpdated(row, col)
                
-        val commentsPane = new CommentsPanel()        
-
-        val start = System.currentTimeMillis()
         
-        for (c <- currentTopic.commentsSorted.takeRight(10)) {                    
-	          commentsPane.a(new CommentPanel(c))
-        }
-        
-        println("Time to display topic (ms): " + (System.currentTimeMillis() - start))
-        
-        CommentsScroll.contents = commentsPane
-        
-
-        BlahActor ! "do"
+        updateCommentsUI
         
         
         
@@ -350,7 +350,7 @@ object Actions {
     }
   } 
 
-object BlahActor extends Actor {
+object BuildCommentsUIActor extends Actor {
   
   def act {
     
@@ -358,19 +358,19 @@ object BlahActor extends Actor {
     
       receive {
         
-        case _ => {
+        case topic : Topic => {
                       
 	        val commentsPaneAll = new CommentsPanel()        
 	
-	        val start1 = System.currentTimeMillis()
+	        val startTime = System.currentTimeMillis()
 	        
-	        for (c <- currentTopic.commentsSorted) {                    
-		          commentsPaneAll.a(new CommentPanel(c))
+	        for (comment <- topic.commentsSorted) {                    
+		          commentsPaneAll.a(new CommentPanel(comment))
 	        }
+
+	        topic.uiCache = commentsPaneAll
 	        
-	        //CommentsScroll.contents = commentsPaneAll
-	        
-	        println("Time to add all comments in topic (ms): " + (System.currentTimeMillis() - start1))
+	        println("Time to add all comments in topic (ms): " + (System.currentTimeMillis() - startTime))
         }
       }
     }

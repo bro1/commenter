@@ -48,7 +48,9 @@ object SubscribeToTopicWindow extends Frame {
     }
 
     case ButtonClicked(`buttonSubscribe`) => {      
-      subscribe(urlField.text)
+      subscribe(urlField.text)            
+      resetFields
+      
       SubscribeToTopicWindow.visible = false
     }    
     
@@ -58,6 +60,12 @@ object SubscribeToTopicWindow extends Frame {
     }
     
 
+  }
+  
+  
+  def resetFields() {
+    urlField.text = ""
+    nameField.text = ""
   }
 
   def subscribe(urlString: String) : Boolean = {    

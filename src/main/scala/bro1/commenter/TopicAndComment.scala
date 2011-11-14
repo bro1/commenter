@@ -16,6 +16,8 @@ class Topic (
   
   var newComments = false
   
+  var uiCache : MainApplication.CommentsPanel = null
+  
   def getURL =  new URL(url)
   
   def commentsSorted = {
@@ -35,24 +37,13 @@ class Topic (
     
     
     print(id + ":")
-    //print(lastChecked)
-    //print(":")
-    //print(getLatestCommentDate())
-    //print(":")
     val d = getNextUpdateD()
     print(d)
     print(":")
-    println(title)
-    //print(comments.size)    
+    println(title)   
     
     d
         
-    /*
-    val now = lastChecked.getTime() 
-    val a = Some(new Date(now + 30 * 1000))
-    println(a)
-    a 
-    */   
   }
   
   /**

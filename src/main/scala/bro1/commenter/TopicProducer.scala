@@ -77,11 +77,18 @@ abstract class TopicProducer {
        
        //val s = MainApplication.topicsTable.selection       
        TopicModel.fireTableDataChanged
+       uiCache(topic) 
        //MainApplication.topicsTable.selection.cells.add(s.cells.first)
        
     }
     
     newComments
+  } 
+  
+  
+  def uiCache(topic : Topic) = {
+    topic.uiCache = null
+    MainApplication.BuildCommentsUIActor ! topic    
   } 
 
   def createTopic(id : Long, url : String, doc : Node) : Topic
